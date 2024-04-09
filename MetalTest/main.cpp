@@ -6,9 +6,13 @@
 //
 
 #include <iostream>
+#include "mtl_engine.hpp"
+
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    MTLEngine engine;
+    engine.init();
+    engine.run();
+    engine.cleanup();
     return 0;
 }
