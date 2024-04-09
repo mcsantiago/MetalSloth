@@ -52,6 +52,8 @@ void MTLEngine::initWindow() {
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
+    glfwSetWindowUserPointer(glfwWindow, this);
+    glfwSetFramebufferSizeCallback(glfwWindow, frameBufferSizeCallback);
 }
 
 void MTLEngine::createTriangle() {
@@ -140,4 +142,13 @@ void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEnco
     NS::UInteger vertexStart = 0;
     NS::UInteger vertexCount = 3;
     renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, vertexCount);
+}
+
+void MTLEngine::frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
+    MTLEngine* engine = (MTLEngine*)glfwGetWindowUserPointer(window);
+    engine->resizeFrameBuffer(width, height);
+}
+
+void MTLEngine::resizeFrameBuffer(int width, int height) {
+    layer->drawableSize() = CGSizeMake(width, height);
 }
