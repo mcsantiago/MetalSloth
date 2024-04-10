@@ -19,7 +19,8 @@ void MTLEngine::init() {
     layer->setDrawableSize(CGSizeMake(800, 600));
     GLFWBridge::AddLayerToWindow(glfwWindow, layer);
     
-    createTriangle();
+//    createTriangle();
+    createSquare();
     createDefaultLibrary();
     createCommandQueue();
     createRenderPipeline();
@@ -97,7 +98,7 @@ void MTLEngine::createRenderPipeline() {
     
     NS::Error* error;
     metalRenderPSO = metalDevice->newRenderPipelineState(renderPipelineDescriptor, &error);
-    if (error != nil) {
+    if (error != NULL) {
         const char* errorMsg = error->description()->utf8String();
         std::cerr << errorMsg << "\n";
         std::exit(-1);
@@ -132,15 +133,17 @@ void MTLEngine::sendRenderCommand() {
 }
 
 void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder) {
-    if (metalRenderPSO == nil) {
+    if (metalRenderPSO == NULL) {
         std::cerr << "LOOOL";
         std::exit(-2);
     }
     renderCommandEncoder->setRenderPipelineState(metalRenderPSO);
-    renderCommandEncoder->setVertexBuffer(triangleVertexBuffer, 0, 0);
+//    renderCommandEncoder->setVertexBuffer(triangleVertexBuffer, 0, 0);
+    renderCommandEncoder->setVertexBuffer(squareVertexBuffer, 0, 0);
     MTL::PrimitiveType typeTriangle = MTL::PrimitiveTypeTriangle;
     NS::UInteger vertexStart = 0;
-    NS::UInteger vertexCount = 3;
+    NS::UInteger vertexCount = 6;
+    renderCommandEncoder->setFragmentTexture(anyaTexture->texture, 0);
     renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, vertexCount);
 }
 
@@ -151,4 +154,19 @@ void MTLEngine::frameBufferSizeCallback(GLFWwindow* window, int width, int heigh
 
 void MTLEngine::resizeFrameBuffer(int width, int height) {
     layer->drawableSize() = CGSizeMake(width, height);
+}
+
+void MTLEngine::createSquare() {
+    VertexData squareVertices[] {
+        {{-0.5, -0.5,  0.5, 1.0f}, {0.0f, 0.0f}},
+        {{-0.5,  0.5,  0.5, 1.0f}, {0.0f, 1.0f}},
+        {{ 0.5,  0.5,  0.5, 1.0f}, {1.0f, 1.0f}},
+        {{-0.5, -0.5,  0.5, 1.0f}, {0.0f, 0.0f}},
+        {{ 0.5,  0.5,  0.5, 1.0f}, {1.0f, 1.0f}},
+        {{ 0.5, -0.5,  0.5, 1.0f}, {1.0f, 0.0f}}
+    };
+
+    squareVertexBuffer = metalDevice->newBuffer(&squareVertices, sizeof(squareVertices), MTL::ResourceStorageModeShared);
+
+    anyaTexture = new Texture("/Users/mac/repos/MetalTest/assets/anya.jpg", metalDevice);
 }

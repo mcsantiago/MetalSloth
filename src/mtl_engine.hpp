@@ -11,10 +11,14 @@
 #define GLFW_INCLUDE_NONE
 #import <GLFW/glfw3.h>
 
+#include "vertex_data.h"
+#include "texture.hpp"
+#include "glfw_bridge.hpp"
+#include <stb/stb_image.h>
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
 #include <QuartzCore/QuartzCore.hpp>
-#include "glfw_bridge.hpp"
+#include <filesystem>
 
 class MTLEngine {
 public:
@@ -26,6 +30,7 @@ private:
     void initDevice();
     void initWindow();
     
+    void createSquare();
     void createTriangle();
     void createDefaultLibrary();
     void createCommandQueue();
@@ -48,7 +53,9 @@ private:
     MTL::CommandBuffer* metalCommandBuffer;
     MTL::RenderPipelineState* metalRenderPSO;
     MTL::Buffer* triangleVertexBuffer;
+    MTL::Buffer* squareVertexBuffer;
     
+    Texture* anyaTexture;
     NS::AutoreleasePool* pPool;
 };
 
