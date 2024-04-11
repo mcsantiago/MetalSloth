@@ -25,6 +25,7 @@ void MTLEngine::init() {
 void MTLEngine::run() {
     while (!glfwWindowShouldClose(glfwWindow)) {
         pPool = NS::AutoreleasePool::alloc()->init();
+        metalDrawable = layer->nextDrawable();
         draw();
         pPool->release();
         glfwPollEvents();
@@ -48,8 +49,8 @@ void MTLEngine::initDevice() {
 void MTLEngine::initWindow() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindow = glfwCreateWindow(800, 600, "Metal Engine", NULL, NULL);
-    if (!glfwWindow) {
+    glfwWindow = glfwCreateWindow(800, 600, "Metal Engine", nullptr, nullptr);
+    if (glfwWindow == nullptr) {
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
