@@ -11,6 +11,7 @@
 #define GLFW_INCLUDE_NONE
 #import <GLFW/glfw3.h>
 
+#include "AAPLMathUtilities.h"
 #include "vertex_data.h"
 #include "texture.hpp"
 #include "glfw_bridge.hpp"
@@ -30,8 +31,12 @@ private:
     void initDevice();
     void initWindow();
     
+    void createCube();
     void createSquare();
     void createTriangle();
+    void createBuffers();
+    void createDepthAndMSAATextures();
+    void createRenderPassDescriptor();
     void createDefaultLibrary();
     void createCommandQueue();
     void createRenderPipeline();
@@ -39,6 +44,7 @@ private:
     void encodeRenderCommand(MTL::RenderCommandEncoder* renderEncoder);
     void sendRenderCommand();
     void draw();
+    void updateRenderPassDescriptor();
     
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
     void resizeFrameBuffer(int width, int height);
@@ -52,8 +58,16 @@ private:
     MTL::CommandQueue* metalCommandQueue;
     MTL::CommandBuffer* metalCommandBuffer;
     MTL::RenderPipelineState* metalRenderPSO;
+    MTL::DepthStencilState* depthStencilState;
+    MTL::RenderPassDescriptor* renderPassDescriptor;
+    MTL::Texture* msaaRenderTargetTexture = nullptr;
+    MTL::Texture* depthTexture;
+    
     MTL::Buffer* triangleVertexBuffer;
     MTL::Buffer* squareVertexBuffer;
+    MTL::Buffer* cubeVertexBuffer;
+    MTL::Buffer* transformationBuffer;
+    int sampleCount = 4;
     
     Texture* anyaTexture;
     NS::AutoreleasePool* pPool;

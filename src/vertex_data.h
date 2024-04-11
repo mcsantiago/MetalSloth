@@ -17,4 +17,10 @@ struct VertexData {
     float2 textureCoordinate;
 };
 
+struct TransformationData {
+    float4x4 modelMatrix;
+    float4x4 viewMatrix;
+    float4x4 perspectiveMatrix;
+};
+
 #endif /* vertex_data_h */
