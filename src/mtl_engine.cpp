@@ -89,7 +89,7 @@ void MTLEngine::createSquare() {
 
     squareVertexBuffer = metalDevice->newBuffer(&squareVertices, sizeof(squareVertices), MTL::ResourceStorageModeShared);
 
-    anyaTexture = new Texture("/Users/mac/repos/MetalTest/assets/anya.jpg", metalDevice);
+    anyaTexture = new Texture("assets/anya.jpg", metalDevice);
 }
 
 void MTLEngine::createCube() {
@@ -151,7 +151,7 @@ void MTLEngine::createCube() {
 
     // Make sure to change working directory to Metal-Tutorial root
     // directory via Product -> Scheme -> Edit Scheme -> Run -> Options
-    anyaTexture = new Texture("/Users/mac/repos/MetalTest/assets/anya.jpg", metalDevice);
+    anyaTexture = new Texture("assets/anya.jpg", metalDevice);
 }
 
 void MTLEngine::createDefaultLibrary() {
@@ -221,9 +221,9 @@ void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEnco
     // Moves the Cube 2 units down the negative Z-axis
     matrix_float4x4 translationMatrix = matrix4x4_translation(0, 0,-1.0);
 
-    float angleInDegrees = glfwGetTime()/2.0 * 45;
+    float angleInDegrees = glfwGetTime()/2.0 * 90;
     float angleInRadians = angleInDegrees * M_PI / 180.0f;
-    matrix_float4x4 rotationMatrix = matrix4x4_rotation(angleInRadians, 0.0, 1.0, 0.0);
+    matrix_float4x4 rotationMatrix = matrix4x4_rotation(angleInRadians, 0.5, 1.0, 0.0);
 
     matrix_float4x4 modelMatrix = simd_mul(translationMatrix, rotationMatrix);
 
