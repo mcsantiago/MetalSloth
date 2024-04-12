@@ -6,6 +6,7 @@
 //
 
 #include "mtl_engine.hpp"
+#include "camera.hpp"
 #include <simd/simd.h>
 #include <iostream>
 
@@ -14,6 +15,7 @@ void MTLEngine::init() {
     initWindow();
     
     createCube();
+    createCamera();
     createBuffers();
     createDefaultLibrary();
     createCommandQueue();
@@ -155,6 +157,18 @@ void MTLEngine::createCube() {
     anyaTexture = new Texture("assets/anya.jpg", metalDevice);
 }
 
+void MTLEngine::createCamera() {
+//    Camera(simd::float3 position = simd::float3{0.0f, 0.0f,  0.0f},
+//           simd::float3 up       = simd::float3{0.0f, 1.0f,  0.0f},
+//           simd::float3 right    = simd::float3{1.0f, 0.0f,  0.0f},
+//           simd::float3 front    = simd::float3{0.0f, 0.0f, -1.0f});
+    simd::float3 position   = simd::float3{0.0f, 0.0f,  1.0f};
+    simd::float3 up         = simd::float3{0.0f, 1.0f,  0.0f};
+    simd::float3 right      = simd::float3{1.0f, 0.0f,  0.0f};
+    simd::float3 front      = simd::float3{0.0f, 0.0f,  -1.0f};
+    camera = new Camera(position, up, right, front);
+}
+
 void MTLEngine::createDefaultLibrary() {
     metalDefaultLibrary = metalDevice->newDefaultLibrary();
     if (!metalDefaultLibrary) {
@@ -228,16 +242,8 @@ void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEnco
 
     matrix_float4x4 modelMatrix = simd_mul(translationMatrix, rotationMatrix);
 
-    simd::float3 R = simd::float3 {1, 0, 0}; // Unit-Right
-    simd::float3 U = simd::float3 {0, 1, 0}; // Unit-Up
-    simd::float3 F = simd::float3 {0, 0,-1}; // Unit-Forward
-    simd::float3 P = simd::float3 {0, 0, 1}; // Camera Position in World Space
-
-    matrix_float4x4 viewMatrix = matrix_make_rows(R.x, R.y, R.z, dot(-R, P),
-                                                  U.x, U.y, U.z, dot(-U, P),
-                                                 -F.x,-F.y,-F.z, dot( F, P),
-                                                  0, 0, 0, 1);
-
+    matrix_float4x4 viewMatrix = camera->generate_view_matrix();
+    
     float aspectRatio = (layer->drawableSize().width / layer->drawableSize().height);
     float fov = 90 * (M_PI / 180.0f);
     float nearZ = 0.1f;

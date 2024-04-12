@@ -14,8 +14,8 @@
             filePath = "src/mtl_engine.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "282"
-            endingLineNumber = "282"
+            startingLineNumber = "288"
+            endingLineNumber = "288"
             landmarkName = "MTLEngine::resizeFrameBuffer(width, height)"
             landmarkType = "7">
          </BreakpointContent>

@@ -15,6 +15,7 @@
 #include "vertex_data.h"
 #include "texture.hpp"
 #include "glfw_bridge.hpp"
+#include "camera.hpp"
 #include <stb/stb_image.h>
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
@@ -40,6 +41,7 @@ private:
     void createDefaultLibrary();
     void createCommandQueue();
     void createRenderPipeline();
+    void createCamera();
     
     void encodeRenderCommand(MTL::RenderCommandEncoder* renderEncoder);
     void sendRenderCommand();
@@ -71,6 +73,8 @@ private:
     
     Texture* anyaTexture;
     NS::AutoreleasePool* pPool;
+    
+    Camera* camera;
 };
 
 
