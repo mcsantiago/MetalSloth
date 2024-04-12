@@ -41,6 +41,7 @@ void MTLEngine::cleanup() {
     depthTexture->release();
     renderPassDescriptor->release();
     metalDevice->release();
+    delete camera;
     delete anyaTexture;
 }
 
