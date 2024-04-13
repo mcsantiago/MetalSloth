@@ -7,16 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "493F0EAF-D945-41A1-BC40-1C4076D56318"
+            uuid = "7B43DE5D-7F4F-4803-83D6-8E0D8558BF7C"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/mtl_engine.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "303"
-            endingLineNumber = "303"
-            landmarkName = "MTLEngine::resizeFrameBuffer(width, height)"
+            startingLineNumber = "277"
+            endingLineNumber = "277"
+            landmarkName = "MTLEngine::encodeRenderCommand(renderCommandEncoder)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

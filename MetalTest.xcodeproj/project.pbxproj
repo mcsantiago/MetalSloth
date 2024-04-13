@@ -150,6 +150,7 @@
 		04C9D31D2BC620B7002BBBA5 /* stb_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stb_image.cpp; sourceTree = "<group>"; };
 		04D1A9E82BC9F6E40087C5D0 /* component_manager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = component_manager.cpp; sourceTree = "<group>"; };
 		04D1A9E92BC9F6E40087C5D0 /* component_manager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = component_manager.hpp; sourceTree = "<group>"; };
+		04D79CE62BCA388100B32924 /* physics_engine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = physics_engine.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +205,7 @@
 				048861992BC8EBC400FE39CD /* camera.hpp */,
 				04D1A9E82BC9F6E40087C5D0 /* component_manager.cpp */,
 				04D1A9E92BC9F6E40087C5D0 /* component_manager.hpp */,
+				04D79CE62BCA388100B32924 /* physics_engine.hpp */,
 			);
 			path = src;
 			sourceTree = "<group>";

@@ -160,7 +160,15 @@ void MTLEngine::createCube() {
     simd::float3 startingRotation = simd::float3 {0, 0, 0};
     simd::float3 startingScale    = simd::float3 {1, 1, 1};
     Transform transform = Transform{startingPosition, startingRotation, startingScale};
+    
+    simd::float3 acceleration = simd::float3 {0, 0, 0};
+    simd::float3 velocity = simd::float3 {0, 0, 0};
+    float mass = 1;
+    KineticPhysicalProperties kinetics = KineticPhysicalProperties{mass, velocity, acceleration};
+    
     componentManager->register_transform(1, transform);
+    componentManager->register_kinetic_physical_properties(1, kinetics);
+    
 
     cubeVertexBuffer = metalDevice->newBuffer(&cubeVertices, sizeof(cubeVertices), MTL::ResourceStorageModeShared);
 
@@ -246,10 +254,39 @@ void MTLEngine::sendRenderCommand() {
     metalCommandBuffer->waitUntilCompleted();
 }
 
+matrix_float4x4 get_model_matrix_next_timestep(int entityId, ComponentManager* manager, float deltaTime) {
+    Transform* transform = manager->get_transform(entityId);
+    KineticPhysicalProperties* kinetics = manager->get_kinetics(entityId);
+    
+    simd::float3& position = transform->position;
+    simd::float3& velocity = kinetics->velocity;
+    simd::float3& acceleration = kinetics->acceleration;
+    
+    float g_y = -9.81;
+    acceleration = simd::float3{0, g_y, 0};
+    velocity += acceleration;
+    position += velocity;
+    
+    matrix_float4x4 translationMatrix = matrix4x4_translation(position);
+    
+    return translationMatrix;
+}
+
 void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder) {
     // Moves the Cube 2 units down the negative Z-axis
     Transform* transform = componentManager->get_transform(1);
-    matrix_float4x4 translationMatrix = matrix4x4_translation(transform->position);
+    KineticPhysicalProperties* kinetics = componentManager->get_kinetics(1);
+    
+    simd::float3& position = transform->position;
+    simd::float3& velocity = kinetics->velocity;
+    simd::float3& acceleration = kinetics->acceleration;
+    
+    float g_y = -0.000981;
+    acceleration = simd::float3{0, g_y, 0};
+    velocity += acceleration;
+    position += velocity;
+    
+    matrix_float4x4 translationMatrix = matrix4x4_translation(position);
 
     // TODO: Introduce physics system
     float angleInDegrees = glfwGetTime()/2.0 * 90;
@@ -258,7 +295,7 @@ void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEnco
     matrix_float4x4 scaleMatrix = matrix4x4_scale(transform->scale);
 
     matrix_float4x4 modelMatrix = simd_mul(translationMatrix, scaleMatrix);
-    modelMatrix                 = simd_mul(modelMatrix, rotationMatrix);
+    modelMatrix = simd_mul(modelMatrix, rotationMatrix);
 
     matrix_float4x4 viewMatrix = camera->generate_view_matrix();
     
