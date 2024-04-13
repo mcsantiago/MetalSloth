@@ -13,6 +13,7 @@
 void MTLEngine::init() {
     initDevice();
     initWindow();
+    initComponentManager();
     
     createCube();
     createCamera();
@@ -22,6 +23,10 @@ void MTLEngine::init() {
     createRenderPipeline();
     createDepthAndMSAATextures();
     createRenderPassDescriptor();
+}
+
+void MTLEngine::initComponentManager() {
+    componentManager = new ComponentManager();
 }
 
 void MTLEngine::run() {
@@ -41,6 +46,7 @@ void MTLEngine::cleanup() {
     depthTexture->release();
     renderPassDescriptor->release();
     metalDevice->release();
+    delete componentManager;
     delete camera;
     delete anyaTexture;
 }
@@ -148,6 +154,13 @@ void MTLEngine::createCube() {
             {{0.5, 0.5, 0.5, 1.0}, {0.0, 1.0}},
             {{0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
         };
+    
+    
+    simd::float3 startingPosition = simd::float3 {1, 1, -3};
+    simd::float3 startingRotation = simd::float3 {0, 0, 0};
+    simd::float3 startingScale    = simd::float3 {1, 1, 1};
+    Transform transform = Transform{startingPosition, startingRotation, startingScale};
+    componentManager->register_transform(1, transform);
 
     cubeVertexBuffer = metalDevice->newBuffer(&cubeVertices, sizeof(cubeVertices), MTL::ResourceStorageModeShared);
 
@@ -235,22 +248,23 @@ void MTLEngine::sendRenderCommand() {
 
 void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder) {
     // Moves the Cube 2 units down the negative Z-axis
-    matrix_float4x4 translationMatrix = matrix4x4_translation(0, 0,-1.0);
+    Transform* transform = componentManager->get_transform(1);
+    matrix_float4x4 translationMatrix = matrix4x4_translation(transform->position);
 
+    // TODO: Introduce physics system
     float angleInDegrees = glfwGetTime()/2.0 * 90;
     float angleInRadians = angleInDegrees * M_PI / 180.0f;
-    matrix_float4x4 rotationMatrix = matrix4x4_rotation(angleInRadians, 0.5, 1.0, 0.0);
+    matrix_float4x4 rotationMatrix = matrix4x4_rotation(angleInRadians, 1.0, 1.0, 0.0);
+    matrix_float4x4 scaleMatrix = matrix4x4_scale(transform->scale);
 
-    matrix_float4x4 modelMatrix = simd_mul(translationMatrix, rotationMatrix);
+    matrix_float4x4 modelMatrix = simd_mul(translationMatrix, scaleMatrix);
+    modelMatrix                 = simd_mul(modelMatrix, rotationMatrix);
 
     matrix_float4x4 viewMatrix = camera->generate_view_matrix();
     
     float aspectRatio = (layer->drawableSize().width / layer->drawableSize().height);
-    float fov = 90 * (M_PI / 180.0f);
-    float nearZ = 0.1f;
-    float farZ = 100.0f;
 
-    matrix_float4x4 perspectiveMatrix = matrix_perspective_right_hand(fov, aspectRatio, nearZ, farZ);
+    matrix_float4x4 perspectiveMatrix = matrix_perspective_right_hand(camera->fov, aspectRatio, camera->nearZ, camera->farZ);
 
     TransformationData transformationData = { modelMatrix, viewMatrix, perspectiveMatrix };
     memcpy(transformationBuffer->contents(), &transformationData, sizeof(transformationData));

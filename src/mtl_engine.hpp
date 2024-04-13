@@ -16,6 +16,7 @@
 #include "texture.hpp"
 #include "glfw_bridge.hpp"
 #include "camera.hpp"
+#include "component_manager.hpp"
 #include <stb/stb_image.h>
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
@@ -31,6 +32,7 @@ public:
 private:
     void initDevice();
     void initWindow();
+    void initComponentManager();
     
     void createCube();
     void createSquare();
@@ -75,6 +77,7 @@ private:
     NS::AutoreleasePool* pPool;
     
     Camera* camera;
+    ComponentManager* componentManager;
 };
 
 

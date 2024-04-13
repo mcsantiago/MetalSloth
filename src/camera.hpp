@@ -16,6 +16,12 @@ public:
     simd::float3 front;
     simd::float3 up;
     simd::float3 right;
+    
+    // TODO: encapsulate these properly
+    float fov = 90 * (M_PI / 180.0f);
+    float nearZ = 0.1f;
+    float farZ = 100.0f;
+    
     simd::float3 worldUp;
     
     Camera(simd::float3 position = simd::float3{0.0f, 0.0f,  0.0f},
