@@ -10,6 +10,7 @@
 
 #include <Metal/Metal.hpp>
 #include <chrono>
+#include <unordered_map>
 #include "mtl_engine.hpp"
 #include "physics_engine.hpp"
 #include "vertex_data.h"
@@ -25,18 +26,27 @@ private:
     MTL::Device* metalDevice;
     
     // TODO: Maybe a map of buffers?
-    MTL::Buffer* cubeVertexBuffer;
-    MTL::Buffer* transformationBuffer;
-    Texture* texture;
+    std::unordered_map<int, MTL::Buffer*> cubeVertexBuffers;
+    std::unordered_map<int, MTL::Buffer*> transformationBuffers;
     
     NS::AutoreleasePool* pPool;
+    Camera* camera;
+    
+    int numEntities = 5;
 
     std::chrono::time_point<std::chrono::high_resolution_clock> lastFrameTime;
 
     void initWindow();
     void initDevice();
     void initSystems();
-    
+    void loadObject(int entityId, 
+                    simd::float3 position,
+                    simd::float3 rotation,
+                    simd::float3 scale,
+                    simd::float3 velocity,
+                    simd::float3 acceleration);
+    void createCamera();
+
 
 public:
     void init();

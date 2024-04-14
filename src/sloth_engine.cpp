@@ -12,8 +12,8 @@ void SlothEngine::init() {
     initDevice();
     initWindow();
     initSystems();
+    numEntities=5;
     loadScene();
-    texture = new Texture("assets/anya.jpg", metalDevice);
 }
 
 void SlothEngine::initDevice() {
@@ -37,17 +37,42 @@ void SlothEngine::initWindow() {
     }
 }
 
+void SlothEngine::createCamera() {
+    //    Camera(simd::float3 position = simd::float3{0.0f, 0.0f,  0.0f},
+    //           simd::float3 up       = simd::float3{0.0f, 1.0f,  0.0f},
+    //           simd::float3 right    = simd::float3{1.0f, 0.0f,  0.0f},
+    //           simd::float3 front    = simd::float3{0.0f, 0.0f, -1.0f});
+    simd::float3 position   = simd::float3{(numEntities/2.0f) + numEntities, 0.0f,  10.0f};
+    simd::float3 up         = simd::float3{0.0f, 1.0f,  0.0f};
+    simd::float3 right      = simd::float3{1.0f, 0.0f,  0.0f};
+    simd::float3 front      = simd::float3{0.0f, 0.0f,  -1.0f};
+    camera = new Camera(position, up, right, front);
+}
+
 void SlothEngine::loadScene() {
+    createCamera();
+    for (int i = 0; i < numEntities; i++) {
+        loadObject(i,
+                  {i * 4.0f, 1, -3},
+                  {0, 0, 0},
+                  {1, 1, 1},
+                  {0, 0, 0},
+                  {0, 0, 0});
+    }
+}
+
+void SlothEngine::loadObject(int entityId, 
+                             simd::float3 position,
+                             simd::float3 rotation,
+                             simd::float3 scale,
+                             simd::float3 velocity,
+                             simd::float3 acceleration) {
+    
     // TODO: Load this from a file
     lastFrameTime = std::chrono::high_resolution_clock::now();
     
-    simd::float3 startingPosition = simd::float3 {1, 1, -3};
-    simd::float3 startingRotation = simd::float3 {0, 0, 0};
-    simd::float3 startingScale    = simd::float3 {1, 1, 1};
-    Transform transform = Transform{startingPosition, startingRotation, startingScale};
+    Transform transform = Transform{position, rotation, scale};
     
-    simd::float3 acceleration = simd::float3 {0, 0, 0};
-    simd::float3 velocity = simd::float3 {0, 0, 0};
     float mass = 1;
     KineticPhysicalProperties kinetics = KineticPhysicalProperties{mass, velocity, acceleration};
     
@@ -101,15 +126,18 @@ void SlothEngine::loadScene() {
             {{0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
         };
     
+    componentManager->register_transform(entityId, transform);
+    componentManager->register_kinetic_physical_properties(entityId, kinetics);
+    
     Texture* texture = new Texture("assets/anya.jpg", metalDevice);
+    componentManager->register_texture(entityId, texture);
 
-    componentManager->register_transform(1, transform);
-    componentManager->register_kinetic_physical_properties(1, kinetics);
-    componentManager->register_texture(1, texture);
+    
+    MTL::Buffer* cubeVerteces = metalDevice->newBuffer(&data, sizeof(data), MTL::ResourceStorageModeShared);
+    cubeVertexBuffers.insert({entityId, cubeVerteces});
+    transformationBuffers.insert({entityId, metalDevice->newBuffer(sizeof(TransformationData), MTL::ResourceStorageModeShared)});
+    componentManager->register_geometry(entityId, cubeVerteces);
 
-    cubeVertexBuffer = metalDevice->newBuffer(&data, sizeof(data), MTL::ResourceStorageModeShared);
-    transformationBuffer = metalDevice->newBuffer(sizeof(TransformationData), MTL::ResourceStorageModeShared);
-    componentManager->register_geometry(1, cubeVertexBuffer);
 }
 
 void SlothEngine::run() {
@@ -118,8 +146,10 @@ void SlothEngine::run() {
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameTime);
         float deltaTime = duration.count() / 1000.0;
         // TODO: Generally we want to iterate through all of the entities and update if needed for all systems
-        physicsSystem->update_entity(1, deltaTime);
-        renderingSystem->run();
+        for (int i = 0; i < numEntities; i++) {
+            physicsSystem->update_entity(i, deltaTime);
+            renderingSystem->run(i, camera);
+        }
         glfwPollEvents();
         lastFrameTime = now;
     }
@@ -129,8 +159,14 @@ void SlothEngine::cleanup() {
     renderingSystem->cleanup();
     physicsSystem->cleanup();
     metalDevice->release();
+    
+//    for (auto it = cubeVertexBuffers.begin(); it != cubeVertexBuffers.end(); ++it) {
+//        if (it->second != nullptr)
+//            delete it->second;
+//    }
+    
+    delete camera;
     delete componentManager;
     delete renderingSystem;
     delete physicsSystem;
-    delete texture;
 }

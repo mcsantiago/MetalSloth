@@ -19,7 +19,6 @@ MTLEngine::MTLEngine(ComponentManager* manager, MTL::Device* metalDevice, GLFWwi
 void MTLEngine::init() {
     initWindow();
     
-    createCamera();
     createBuffers();
     createDefaultLibrary();
     createCommandQueue();
@@ -28,10 +27,10 @@ void MTLEngine::init() {
     createRenderPassDescriptor();
 }
 
-void MTLEngine::run() {
+void MTLEngine::run(int entityId, Camera* camera) {
     pPool = NS::AutoreleasePool::alloc()->init();
     metalDrawable = layer->nextDrawable();
-    draw();
+    draw(entityId, camera);
     pPool->release();
 }
 
@@ -86,18 +85,6 @@ void MTLEngine::createSquare() {
 //    anyaTexture = new Texture("assets/anya.jpg", metalDevice);
 }
 
-void MTLEngine::createCamera() {
-//    Camera(simd::float3 position = simd::float3{0.0f, 0.0f,  0.0f},
-//           simd::float3 up       = simd::float3{0.0f, 1.0f,  0.0f},
-//           simd::float3 right    = simd::float3{1.0f, 0.0f,  0.0f},
-//           simd::float3 front    = simd::float3{0.0f, 0.0f, -1.0f});
-    simd::float3 position   = simd::float3{0.0f, 0.0f,  1.0f};
-    simd::float3 up         = simd::float3{0.0f, 1.0f,  0.0f};
-    simd::float3 right      = simd::float3{1.0f, 0.0f,  0.0f};
-    simd::float3 front      = simd::float3{0.0f, 0.0f,  -1.0f};
-    camera = new Camera(position, up, right, front);
-}
-
 void MTLEngine::createDefaultLibrary() {
     metalDefaultLibrary = metalDevice->newDefaultLibrary();
     if (!metalDefaultLibrary) {
@@ -144,16 +131,16 @@ void MTLEngine::createRenderPipeline() {
     depthStencilDescriptor->release();
 }
 
-void MTLEngine::draw() {
-    sendRenderCommand();
+void MTLEngine::draw(int entityId, Camera* camera) {
+    sendRenderCommand(entityId, camera);
 }
 
-void MTLEngine::sendRenderCommand() {
+void MTLEngine::sendRenderCommand(int entityId, Camera* camera) {
     metalCommandBuffer = metalCommandQueue->commandBuffer();
     
     updateRenderPassDescriptor();
     MTL::RenderCommandEncoder* renderCommandEncoder = metalCommandBuffer->renderCommandEncoder(renderPassDescriptor);
-    encodeRenderCommand(renderCommandEncoder);
+    encodeRenderCommand(renderCommandEncoder, entityId, camera);
     renderCommandEncoder->endEncoding();
     
     metalCommandBuffer->presentDrawable(metalDrawable);
@@ -161,11 +148,11 @@ void MTLEngine::sendRenderCommand() {
     metalCommandBuffer->waitUntilCompleted();
 }
 
-void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder) {
+void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder, int entityId, Camera* camera) {
     // Moves the Cube 2 units down the negative Z-axis
-    Transform* transform = componentManager->get_transform(1);
-    Texture* textureData = componentManager->get_texture(1);
-    MTL::Buffer* geometryData = componentManager->get_geometry(1);
+    Transform* transform = componentManager->get_transform(entityId);
+    Texture* textureData = componentManager->get_texture(entityId);
+    MTL::Buffer* geometryData = componentManager->get_geometry(entityId);
     matrix_float4x4 translationMatrix = matrix4x4_translation(transform->position);
 
     // TODO: Introduce physics system

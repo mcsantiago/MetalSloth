@@ -27,7 +27,7 @@ class MTLEngine {
 public:
     MTLEngine(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow);
     void init();
-    void run();
+    void run(int entityId, Camera* camera);
     void cleanup();
     
 private:
@@ -42,11 +42,10 @@ private:
     void createDefaultLibrary();
     void createCommandQueue();
     void createRenderPipeline();
-    void createCamera();
     
-    void encodeRenderCommand(MTL::RenderCommandEncoder* renderEncoder);
-    void sendRenderCommand();
-    void draw();
+    void encodeRenderCommand(MTL::RenderCommandEncoder* renderEncoder, int entityId, Camera* camera);
+    void sendRenderCommand(int entityId, Camera* camera);
+    void draw(int entityId, Camera* camera);
     void updateRenderPassDescriptor();
     
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
