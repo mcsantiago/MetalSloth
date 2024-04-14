@@ -10,6 +10,9 @@
 
 #include <simd/simd.h>
 #include <unordered_map>
+#include <vector>
+#include "vertex_data.h"
+#include "texture.hpp"
 
 struct Transform {
     simd::float3 position;
@@ -27,12 +30,19 @@ class ComponentManager {
 private:
     std::unordered_map<int, Transform> transforms;
     std::unordered_map<int, KineticPhysicalProperties> kinetics;
+    std::unordered_map<int, MTL::Buffer*> geometryData;
+    std::unordered_map<int, Texture*> textureData;
 public:
-    int register_transform(int entityId, Transform transformComponent);
-    int register_kinetic_physical_properties(int entityId, KineticPhysicalProperties component);
-    
+    int register_transform(int entityId, Transform);
+    int register_kinetic_physical_properties(int entityId, KineticPhysicalProperties);
+    int register_geometry(int entityId, MTL::Buffer* geometryBuffer);
+    int register_texture(int entityId, Texture* texture);
+    void cleanup();
+
     Transform* get_transform(int entityId);
     KineticPhysicalProperties* get_kinetics(int entityId);
+    MTL::Buffer* get_geometry(int entityId);
+    Texture* get_texture(int entityId);
 };
 
 #endif /* component_manager_hpp */

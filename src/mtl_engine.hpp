@@ -25,14 +25,13 @@
 
 class MTLEngine {
 public:
+    MTLEngine(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow);
     void init();
     void run();
     void cleanup();
     
 private:
-    void initDevice();
     void initWindow();
-    void initComponentManager();
     
     void createCube();
     void createSquare();
@@ -73,7 +72,6 @@ private:
     MTL::Buffer* transformationBuffer;
     int sampleCount = 4;
     
-    Texture* anyaTexture;
     NS::AutoreleasePool* pPool;
     
     Camera* camera;

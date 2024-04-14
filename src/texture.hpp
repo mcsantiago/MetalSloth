@@ -17,9 +17,6 @@ public:
     ~Texture();
     MTL::Texture* texture;
     int width, height, channels;
-    
-private:
-    MTL::Device* device;
 };
 
 #endif /* texture_hpp */

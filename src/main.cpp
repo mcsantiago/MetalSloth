@@ -6,11 +6,11 @@
 //
 
 #include <iostream>
-#include "mtl_engine.hpp"
+#include "sloth_engine.hpp"
 
 
 int main(int argc, const char * argv[]) {
-    MTLEngine engine;
+    SlothEngine engine;
     engine.init();
     engine.run();
     engine.cleanup();

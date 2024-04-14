@@ -10,12 +10,15 @@
 #include <simd/simd.h>
 #include <iostream>
 
+MTLEngine::MTLEngine(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow) {
+    this->componentManager = manager;
+    this->metalDevice = metalDevice;
+    this->glfwWindow = glfwWindow;
+}
+
 void MTLEngine::init() {
-    initDevice();
     initWindow();
-    initComponentManager();
     
-    createCube();
     createCamera();
     createBuffers();
     createDefaultLibrary();
@@ -25,44 +28,25 @@ void MTLEngine::init() {
     createRenderPassDescriptor();
 }
 
-void MTLEngine::initComponentManager() {
-    componentManager = new ComponentManager();
-}
-
 void MTLEngine::run() {
-    while (!glfwWindowShouldClose(glfwWindow)) {
-        pPool = NS::AutoreleasePool::alloc()->init();
-        metalDrawable = layer->nextDrawable();
-        draw();
-        pPool->release();
-        glfwPollEvents();
-    }
+    pPool = NS::AutoreleasePool::alloc()->init();
+    metalDrawable = layer->nextDrawable();
+    draw();
+    pPool->release();
 }
 
 void MTLEngine::cleanup() {
+    // componentManager will be cleaned up by SlothEngine
     glfwTerminate();
     transformationBuffer->release();
     msaaRenderTargetTexture->release();
     depthTexture->release();
     renderPassDescriptor->release();
-    metalDevice->release();
-    delete componentManager;
     delete camera;
-    delete anyaTexture;
 }
 
-void MTLEngine::initDevice() {
-    metalDevice = MTL::CreateSystemDefaultDevice();
-}
 
 void MTLEngine::initWindow() {
-    glfwInit();
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindow = glfwCreateWindow(800, 600, "Metal Engine", nullptr, nullptr);
-    if (glfwWindow == nullptr) {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
     glfwSetWindowUserPointer(glfwWindow, this);
     glfwSetFramebufferSizeCallback(glfwWindow, frameBufferSizeCallback);
     
@@ -99,84 +83,7 @@ void MTLEngine::createSquare() {
 
     squareVertexBuffer = metalDevice->newBuffer(&squareVertices, sizeof(squareVertices), MTL::ResourceStorageModeShared);
 
-    anyaTexture = new Texture("assets/anya.jpg", metalDevice);
-}
-
-void MTLEngine::createCube() {
-    // Cube for use in a right-handed coordinate system with triangle faces
-    // specified with a Counter-Clockwise winding order.
-    VertexData cubeVertices[] = {
-            // Front face
-            {{-0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
-            {{0.5, -0.5, 0.5, 1.0}, {1.0, 0.0}},
-            {{0.5, 0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, 0.5, 1.0}, {0.0, 1.0}},
-            {{-0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
-
-            // Back face
-            {{0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-            {{-0.5, -0.5, -0.5, 1.0}, {1.0, 0.0}},
-            {{-0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {0.0, 1.0}},
-            {{0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-
-            // Top face
-            {{-0.5, 0.5, 0.5, 1.0}, {0.0, 0.0}},
-            {{0.5, 0.5, 0.5, 1.0}, {1.0, 0.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, -0.5, 1.0}, {0.0, 1.0}},
-            {{-0.5, 0.5, 0.5, 1.0}, {0.0, 0.0}},
-
-            // Bottom face
-            {{-0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-            {{0.5, -0.5, -0.5, 1.0}, {1.0, 0.0}},
-            {{0.5, -0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, -0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, -0.5, 0.5, 1.0}, {0.0, 1.0}},
-            {{-0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-
-            // Left face
-            {{-0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-            {{-0.5, -0.5, 0.5, 1.0}, {1.0, 0.0}},
-            {{-0.5, 0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, -0.5, 1.0}, {0.0, 1.0}},
-            {{-0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-
-            // Right face
-            {{0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
-            {{0.5, -0.5, -0.5, 1.0}, {1.0, 0.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, 0.5, 1.0}, {0.0, 1.0}},
-            {{0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
-        };
-    
-    
-    simd::float3 startingPosition = simd::float3 {1, 1, -3};
-    simd::float3 startingRotation = simd::float3 {0, 0, 0};
-    simd::float3 startingScale    = simd::float3 {1, 1, 1};
-    Transform transform = Transform{startingPosition, startingRotation, startingScale};
-    
-    simd::float3 acceleration = simd::float3 {0, 0, 0};
-    simd::float3 velocity = simd::float3 {0, 0, 0};
-    float mass = 1;
-    KineticPhysicalProperties kinetics = KineticPhysicalProperties{mass, velocity, acceleration};
-    
-    componentManager->register_transform(1, transform);
-    componentManager->register_kinetic_physical_properties(1, kinetics);
-    
-
-    cubeVertexBuffer = metalDevice->newBuffer(&cubeVertices, sizeof(cubeVertices), MTL::ResourceStorageModeShared);
-
-    transformationBuffer = metalDevice->newBuffer(sizeof(TransformationData), MTL::ResourceStorageModeShared);
-
-    // Make sure to change working directory to Metal-Tutorial root
-    // directory via Product -> Scheme -> Edit Scheme -> Run -> Options
-    anyaTexture = new Texture("assets/anya.jpg", metalDevice);
+//    anyaTexture = new Texture("assets/anya.jpg", metalDevice);
 }
 
 void MTLEngine::createCamera() {
@@ -254,39 +161,12 @@ void MTLEngine::sendRenderCommand() {
     metalCommandBuffer->waitUntilCompleted();
 }
 
-matrix_float4x4 get_model_matrix_next_timestep(int entityId, ComponentManager* manager, float deltaTime) {
-    Transform* transform = manager->get_transform(entityId);
-    KineticPhysicalProperties* kinetics = manager->get_kinetics(entityId);
-    
-    simd::float3& position = transform->position;
-    simd::float3& velocity = kinetics->velocity;
-    simd::float3& acceleration = kinetics->acceleration;
-    
-    float g_y = -9.81;
-    acceleration = simd::float3{0, g_y, 0};
-    velocity += acceleration;
-    position += velocity;
-    
-    matrix_float4x4 translationMatrix = matrix4x4_translation(position);
-    
-    return translationMatrix;
-}
-
 void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder) {
     // Moves the Cube 2 units down the negative Z-axis
     Transform* transform = componentManager->get_transform(1);
-    KineticPhysicalProperties* kinetics = componentManager->get_kinetics(1);
-    
-    simd::float3& position = transform->position;
-    simd::float3& velocity = kinetics->velocity;
-    simd::float3& acceleration = kinetics->acceleration;
-    
-    float g_y = -0.000981;
-    acceleration = simd::float3{0, g_y, 0};
-    velocity += acceleration;
-    position += velocity;
-    
-    matrix_float4x4 translationMatrix = matrix4x4_translation(position);
+    Texture* textureData = componentManager->get_texture(1);
+    MTL::Buffer* geometryData = componentManager->get_geometry(1);
+    matrix_float4x4 translationMatrix = matrix4x4_translation(transform->position);
 
     // TODO: Introduce physics system
     float angleInDegrees = glfwGetTime()/2.0 * 90;
@@ -311,12 +191,12 @@ void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEnco
 //    renderCommandEncoder->setTriangleFillMode(MTL::TriangleFillModeLines);
     renderCommandEncoder->setRenderPipelineState(metalRenderPSO);
     renderCommandEncoder->setDepthStencilState(depthStencilState);
-    renderCommandEncoder->setVertexBuffer(cubeVertexBuffer, 0, 0);
+    renderCommandEncoder->setVertexBuffer(geometryData, 0, 0);
     renderCommandEncoder->setVertexBuffer(transformationBuffer, 0, 1);
     MTL::PrimitiveType typeTriangle = MTL::PrimitiveTypeTriangle;
     NS::UInteger vertexStart = 0;
     NS::UInteger vertexCount = 36;
-    renderCommandEncoder->setFragmentTexture(anyaTexture->texture, 0);
+    renderCommandEncoder->setFragmentTexture(textureData->texture, 0);
     renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, vertexCount);
 }
 
