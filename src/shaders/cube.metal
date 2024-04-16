@@ -24,10 +24,11 @@ struct VertexOut {
 };
 
 vertex VertexOut vertexShader(uint vertexID [[vertex_id]],
-             constant VertexData* vertexData,
-             constant TransformationData* transformationData) {
+             constant VertexData* vertexData [[buffer(0)]],
+             constant TransformationData* transformationData [[buffer(1)]],
+             uint instanceId [[instance_id]]) {
     VertexOut out;
-    out.position = transformationData->perspectiveMatrix * transformationData->viewMatrix * transformationData->modelMatrix * vertexData[vertexID].position;
+    out.position = transformationData[instanceId].perspectiveMatrix * transformationData[instanceId].viewMatrix * transformationData[instanceId].modelMatrix * vertexData[vertexID].position;
     out.textureCoordinate = vertexData[vertexID].textureCoordinate;
     return out;
 }

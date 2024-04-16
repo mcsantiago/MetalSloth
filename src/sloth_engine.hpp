@@ -32,8 +32,6 @@ private:
     NS::AutoreleasePool* pPool;
     Camera* camera;
     
-    int numEntities = 5;
-
     std::chrono::time_point<std::chrono::high_resolution_clock> lastFrameTime;
 
     void initWindow();

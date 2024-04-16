@@ -27,10 +27,33 @@ void MTLEngine::init() {
     createRenderPassDescriptor();
 }
 
-void MTLEngine::run(int entityId, Camera* camera) {
+void MTLEngine::run(Camera* camera) {
     pPool = NS::AutoreleasePool::alloc()->init();
+    MTL::Buffer* geometryData = componentManager->get_geometry(0);
+    Texture* textureData = componentManager->get_texture(0);
     metalDrawable = layer->nextDrawable();
-    draw(entityId, camera);
+    metalCommandBuffer = metalCommandQueue->commandBuffer();
+    MTL::RenderCommandEncoder* renderCommandEncoder = metalCommandBuffer->renderCommandEncoder(renderPassDescriptor);
+    updateRenderPassDescriptor();
+    for (int i = 0; i < componentManager->getNumEntities(); i++) {
+        encodeRenderCommand(renderCommandEncoder, i, camera);
+    }
+    
+    memcpy(transformationBuffer->contents(), &transformationData, sizeof(transformationData));
+    renderCommandEncoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
+    renderCommandEncoder->setCullMode(MTL::CullModeBack);
+//    renderCommandEncoder->setTriangleFillMode(MTL::TriangleFillModeLines);
+    renderCommandEncoder->setRenderPipelineState(metalRenderPSO);
+    renderCommandEncoder->setDepthStencilState(depthStencilState);
+    renderCommandEncoder->setVertexBuffer(geometryData, 0, 0);
+    renderCommandEncoder->setVertexBuffer(transformationBuffer, 0, 1);
+    MTL::PrimitiveType typeTriangle = MTL::PrimitiveTypeTriangle;
+    NS::UInteger vertexStart = 0;
+    NS::UInteger vertexCount = 36;
+    renderCommandEncoder->setFragmentTexture(textureData->texture, 0);
+    renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, vertexCount, componentManager->getNumEntities());
+    renderCommandEncoder->endEncoding();
+    swapBuffers();
     pPool->release();
 }
 
@@ -41,7 +64,6 @@ void MTLEngine::cleanup() {
     msaaRenderTargetTexture->release();
     depthTexture->release();
     renderPassDescriptor->release();
-    delete camera;
 }
 
 
@@ -64,9 +86,9 @@ void MTLEngine::createTriangle() {
         { 0.0f,  0.5f, 0.0f}
     };
     
-    triangleVertexBuffer = metalDevice->newBuffer(&triangleVertices,
-                                                  sizeof(triangleVertices),
-                                                  MTL::ResourceStorageModeShared);
+    vertexBuffer = metalDevice->newBuffer(&triangleVertices,
+                                          sizeof(triangleVertices),
+                                          MTL::ResourceStorageModeShared);
     
 }
 
@@ -80,7 +102,7 @@ void MTLEngine::createSquare() {
         {{ 0.5, -0.5,  0.5, 1.0f}, {1.0f, 0.0f}}
     };
 
-    squareVertexBuffer = metalDevice->newBuffer(&squareVertices, sizeof(squareVertices), MTL::ResourceStorageModeShared);
+    vertexBuffer = metalDevice->newBuffer(&squareVertices, sizeof(squareVertices), MTL::ResourceStorageModeShared);
 
 //    anyaTexture = new Texture("assets/anya.jpg", metalDevice);
 }
@@ -131,18 +153,15 @@ void MTLEngine::createRenderPipeline() {
     depthStencilDescriptor->release();
 }
 
-void MTLEngine::draw(int entityId, Camera* camera) {
-    sendRenderCommand(entityId, camera);
+void MTLEngine::draw(int entityId, Camera* camera, MTL::RenderCommandEncoder* encoder) {
+    sendRenderCommand(entityId, camera, encoder);
 }
 
-void MTLEngine::sendRenderCommand(int entityId, Camera* camera) {
-    metalCommandBuffer = metalCommandQueue->commandBuffer();
-    
-    updateRenderPassDescriptor();
-    MTL::RenderCommandEncoder* renderCommandEncoder = metalCommandBuffer->renderCommandEncoder(renderPassDescriptor);
+void MTLEngine::sendRenderCommand(int entityId, Camera* camera, MTL::RenderCommandEncoder* renderCommandEncoder) {
     encodeRenderCommand(renderCommandEncoder, entityId, camera);
-    renderCommandEncoder->endEncoding();
-    
+}
+
+void MTLEngine::swapBuffers() {
     metalCommandBuffer->presentDrawable(metalDrawable);
     metalCommandBuffer->commit();
     metalCommandBuffer->waitUntilCompleted();
@@ -151,8 +170,6 @@ void MTLEngine::sendRenderCommand(int entityId, Camera* camera) {
 void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder, int entityId, Camera* camera) {
     // Moves the Cube 2 units down the negative Z-axis
     Transform* transform = componentManager->get_transform(entityId);
-    Texture* textureData = componentManager->get_texture(entityId);
-    MTL::Buffer* geometryData = componentManager->get_geometry(entityId);
     matrix_float4x4 translationMatrix = matrix4x4_translation(transform->position);
 
     // TODO: Introduce physics system
@@ -170,21 +187,7 @@ void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEnco
 
     matrix_float4x4 perspectiveMatrix = matrix_perspective_right_hand(camera->fov, aspectRatio, camera->nearZ, camera->farZ);
 
-    TransformationData transformationData = { modelMatrix, viewMatrix, perspectiveMatrix };
-    memcpy(transformationBuffer->contents(), &transformationData, sizeof(transformationData));
-
-    renderCommandEncoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
-    renderCommandEncoder->setCullMode(MTL::CullModeBack);
-//    renderCommandEncoder->setTriangleFillMode(MTL::TriangleFillModeLines);
-    renderCommandEncoder->setRenderPipelineState(metalRenderPSO);
-    renderCommandEncoder->setDepthStencilState(depthStencilState);
-    renderCommandEncoder->setVertexBuffer(geometryData, 0, 0);
-    renderCommandEncoder->setVertexBuffer(transformationBuffer, 0, 1);
-    MTL::PrimitiveType typeTriangle = MTL::PrimitiveTypeTriangle;
-    NS::UInteger vertexStart = 0;
-    NS::UInteger vertexCount = 36;
-    renderCommandEncoder->setFragmentTexture(textureData->texture, 0);
-    renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, vertexCount);
+    transformationData[entityId] = { modelMatrix, viewMatrix, perspectiveMatrix };
 }
 
 void MTLEngine::frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -209,7 +212,7 @@ void MTLEngine::resizeFrameBuffer(int width, int height) {
 }
 
 void MTLEngine::createBuffers() {
-    transformationBuffer = metalDevice->newBuffer(sizeof(TransformationData), MTL::ResourceStorageModeShared);
+    transformationBuffer = metalDevice->newBuffer(sizeof(transformationData), MTL::ResourceStorageModeShared);
 }
 
 void MTLEngine::createDepthAndMSAATextures() {

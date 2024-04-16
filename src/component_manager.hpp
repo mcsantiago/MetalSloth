@@ -32,11 +32,16 @@ private:
     std::unordered_map<int, KineticPhysicalProperties> kinetics;
     std::unordered_map<int, MTL::Buffer*> geometryData;
     std::unordered_map<int, Texture*> textureData;
+    int numEntities = 5;
 public:
     int register_transform(int entityId, Transform);
     int register_kinetic_physical_properties(int entityId, KineticPhysicalProperties);
     int register_geometry(int entityId, MTL::Buffer* geometryBuffer);
     int register_texture(int entityId, Texture* texture);
+    
+    int getNumEntities() {
+        return 5;
+    }
     void cleanup();
 
     Transform* get_transform(int entityId);

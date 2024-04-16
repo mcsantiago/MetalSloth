@@ -12,7 +12,6 @@ void SlothEngine::init() {
     initDevice();
     initWindow();
     initSystems();
-    numEntities=5;
     loadScene();
 }
 
@@ -42,6 +41,7 @@ void SlothEngine::createCamera() {
     //           simd::float3 up       = simd::float3{0.0f, 1.0f,  0.0f},
     //           simd::float3 right    = simd::float3{1.0f, 0.0f,  0.0f},
     //           simd::float3 front    = simd::float3{0.0f, 0.0f, -1.0f});
+    int numEntities = componentManager->getNumEntities();
     simd::float3 position   = simd::float3{(numEntities/2.0f) + numEntities, 0.0f,  10.0f};
     simd::float3 up         = simd::float3{0.0f, 1.0f,  0.0f};
     simd::float3 right      = simd::float3{1.0f, 0.0f,  0.0f};
@@ -51,7 +51,7 @@ void SlothEngine::createCamera() {
 
 void SlothEngine::loadScene() {
     createCamera();
-    for (int i = 0; i < numEntities; i++) {
+    for (int i = 0; i < componentManager->getNumEntities(); i++) {
         loadObject(i,
                   {i * 4.0f, 1, -3},
                   {0, 0, 0},
@@ -145,11 +145,8 @@ void SlothEngine::run() {
         std::chrono::time_point now = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameTime);
         float deltaTime = duration.count() / 1000.0;
-        // TODO: Generally we want to iterate through all of the entities and update if needed for all systems
-        for (int i = 0; i < numEntities; i++) {
-            physicsSystem->update_entity(i, deltaTime);
-            renderingSystem->run(i, camera);
-        }
+        physicsSystem->update_loaded_entities(deltaTime);
+        renderingSystem->run(camera);
         glfwPollEvents();
         lastFrameTime = now;
     }

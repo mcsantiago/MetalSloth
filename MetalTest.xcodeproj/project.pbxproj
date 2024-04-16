@@ -22,6 +22,7 @@
 		04C9D31A2BC5FDF0002BBBA5 /* glfw_bridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 04C9D3182BC5FDF0002BBBA5 /* glfw_bridge.mm */; };
 		04D1A9EA2BC9F6E40087C5D0 /* component_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04D1A9E82BC9F6E40087C5D0 /* component_manager.cpp */; };
 		04D79CE92BCA444500B32924 /* sloth_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04D79CE72BCA444500B32924 /* sloth_engine.cpp */; };
+		04D79CEC2BCCC0F300B32924 /* entity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04D79CEA2BCCC0F300B32924 /* entity.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -154,6 +155,8 @@
 		04D79CE62BCA388100B32924 /* physics_engine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = physics_engine.hpp; sourceTree = "<group>"; };
 		04D79CE72BCA444500B32924 /* sloth_engine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sloth_engine.cpp; sourceTree = "<group>"; };
 		04D79CE82BCA444500B32924 /* sloth_engine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sloth_engine.hpp; sourceTree = "<group>"; };
+		04D79CEA2BCCC0F300B32924 /* entity.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = entity.cpp; sourceTree = "<group>"; };
+		04D79CEB2BCCC0F300B32924 /* entity.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = entity.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,6 +214,8 @@
 				04D79CE62BCA388100B32924 /* physics_engine.hpp */,
 				04D79CE72BCA444500B32924 /* sloth_engine.cpp */,
 				04D79CE82BCA444500B32924 /* sloth_engine.hpp */,
+				04D79CEA2BCCC0F300B32924 /* entity.cpp */,
+				04D79CEB2BCCC0F300B32924 /* entity.hpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -484,6 +489,7 @@
 				0488619A2BC8EE0D00FE39CD /* camera.cpp in Sources */,
 				043A3BC82BC62D5400912B5D /* cube.metal in Sources */,
 				04C9D3142BC4F724002BBBA5 /* mtl_engine.cpp in Sources */,
+				04D79CEC2BCCC0F300B32924 /* entity.cpp in Sources */,
 				043A3BCB2BC6392500912B5D /* AAPLMathUtilities.cpp in Sources */,
 				04C9D31A2BC5FDF0002BBBA5 /* glfw_bridge.mm in Sources */,
 				040E504B2BC398A600A0D222 /* main.cpp in Sources */,

@@ -14,8 +14,8 @@
             filePath = "src/mtl_engine.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "153"
-            endingLineNumber = "153"
+            startingLineNumber = "172"
+            endingLineNumber = "172"
             landmarkName = "MTLEngine::encodeRenderCommand(renderCommandEncoder, entityId, camera)"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "src/physics_engine.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "37"
-            endingLineNumber = "37"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
             landmarkName = "update_entity(entityId, deltaTime)"
             landmarkType = "7">
          </BreakpointContent>
@@ -62,8 +62,8 @@
             filePath = "src/physics_engine.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "30"
-            endingLineNumber = "30"
+            startingLineNumber = "36"
+            endingLineNumber = "36"
             landmarkName = "update_entity(entityId, deltaTime)"
             landmarkType = "7">
          </BreakpointContent>
@@ -94,8 +94,8 @@
             filePath = "src/mtl_engine.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "154"
-            endingLineNumber = "154"
+            startingLineNumber = "173"
+            endingLineNumber = "173"
             landmarkName = "MTLEngine::encodeRenderCommand(renderCommandEncoder, entityId, camera)"
             landmarkType = "7">
          </BreakpointContent>
@@ -103,32 +103,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "E0523147-84EE-4F87-A430-1E8675F45E4A"
+            uuid = "18FD8F5C-9FA0-4986-8685-C7AF0C727A18"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/mtl_engine.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "155"
-            endingLineNumber = "155"
-            landmarkName = "MTLEngine::encodeRenderCommand(renderCommandEncoder, entityId, camera)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "565EF009-9EBF-41B9-8527-B8CC24310074"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/mtl_engine.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "156"
-            endingLineNumber = "156"
-            landmarkName = "MTLEngine::encodeRenderCommand(renderCommandEncoder, entityId, camera)"
+            startingLineNumber = "31"
+            endingLineNumber = "31"
+            landmarkName = "MTLEngine::run(camera)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

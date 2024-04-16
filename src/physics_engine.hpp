@@ -17,13 +17,19 @@ private:
     MTL::Device* metalDevice;
     const float G = 6.674e-11;          // 6.674e-11 (Nm^2)/(kg^2)
     const float g = 9.81;               // 9.81 m/(s^2)
-    const float physical_scale = 1e-2;  // universal scale factor to look nice on screen
+    const float physical_scale = 1e-4;  // universal scale factor to look nice on screen
     
 public:
     PhysicsSystem(ComponentManager* manager, MTL::Device* metalDevice) {
         this->manager = manager;
         this->metalDevice = metalDevice;
     };
+    
+    void update_loaded_entities(float deltaTime) {
+        for (int i = 0; i < manager->getNumEntities(); i++) {
+            update_entity(i, deltaTime);
+        }
+    }
     
     void update_entity(int entityId, float deltaTime) {
         Transform* transform = manager->get_transform(entityId);
@@ -34,7 +40,7 @@ public:
         simd::float3& acceleration = kinetics->acceleration;
         
         float g_y = -1 * g * physical_scale;
-        acceleration = simd::float3{0, g_y * deltaTime, 0};
+        acceleration = simd::float3{0, g_y, 0};
         velocity += acceleration;
         position += velocity;
     }

@@ -27,7 +27,8 @@ class MTLEngine {
 public:
     MTLEngine(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow);
     void init();
-    void run(int entityId, Camera* camera);
+    void run(Camera* camera);
+    void swapBuffers();
     void cleanup();
     
 private:
@@ -44,13 +45,14 @@ private:
     void createRenderPipeline();
     
     void encodeRenderCommand(MTL::RenderCommandEncoder* renderEncoder, int entityId, Camera* camera);
-    void sendRenderCommand(int entityId, Camera* camera);
-    void draw(int entityId, Camera* camera);
+    void sendRenderCommand(int entityId, Camera* camera, MTL::RenderCommandEncoder* renderEncoder);
+    void draw(int entityId, Camera* camera, MTL::RenderCommandEncoder* renderEncoder);
     void updateRenderPassDescriptor();
     
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
     void resizeFrameBuffer(int width, int height);
     
+    TransformationData transformationData[5];
     MTL::Device* metalDevice;
     GLFWwindow* glfwWindow;
     CA::MetalDrawable* metalDrawable;
@@ -65,11 +67,9 @@ private:
     MTL::Texture* msaaRenderTargetTexture = nullptr;
     MTL::Texture* depthTexture;
     
-    MTL::Buffer* triangleVertexBuffer;
-    MTL::Buffer* squareVertexBuffer;
-    MTL::Buffer* cubeVertexBuffer;
+    MTL::Buffer* vertexBuffer;
     MTL::Buffer* transformationBuffer;
-    int sampleCount = 4;
+    int sampleCount = 4; // MSAA Sample count
     
     NS::AutoreleasePool* pPool;
     
