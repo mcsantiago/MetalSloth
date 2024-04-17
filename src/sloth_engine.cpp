@@ -6,7 +6,7 @@
 //
 
 #include "sloth_engine.hpp"
-
+#include <cmath>
 
 void SlothEngine::init() {
     initDevice();
@@ -41,8 +41,8 @@ void SlothEngine::createCamera() {
     //           simd::float3 up       = simd::float3{0.0f, 1.0f,  0.0f},
     //           simd::float3 right    = simd::float3{1.0f, 0.0f,  0.0f},
     //           simd::float3 front    = simd::float3{0.0f, 0.0f, -1.0f});
-    int numEntities = componentManager->getNumEntities();
-    simd::float3 position   = simd::float3{(numEntities/2.0f) + numEntities, 0.0f,  10.0f};
+    int c = cbrt(static_cast<double>(componentManager->getNumEntities()));
+    simd::float3 position   = simd::float3{c * 1.0f, c * 1.0f,  c * 3.0f};
     simd::float3 up         = simd::float3{0.0f, 1.0f,  0.0f};
     simd::float3 right      = simd::float3{1.0f, 0.0f,  0.0f};
     simd::float3 front      = simd::float3{0.0f, 0.0f,  -1.0f};
@@ -51,13 +51,21 @@ void SlothEngine::createCamera() {
 
 void SlothEngine::loadScene() {
     createCamera();
-    for (int i = 0; i < componentManager->getNumEntities(); i++) {
-        loadObject(i,
-                  {i * 4.0f, 1, -3},
-                  {0, 0, 0},
-                  {1, 1, 1},
-                  {0, 0, 0},
-                  {0, 0, 0});
+    int c = cbrt(static_cast<double>(componentManager->getNumEntities()));
+    texture = new Texture("assets/anya.jpg", metalDevice);
+    vertexBuffer = metalDevice->newBuffer(&vertexData, sizeof(vertexData), MTL::ResourceStorageModeShared);
+    int n = 0;
+    for (int i = 0; i < c; i++) {
+        for (int j = 0; j < c; j++) {
+            for (int k = 0; k < c; k++) {
+                loadObject(n++,
+                          {i * 2.0f, j * 2.0f, k * 2.0f},
+                          {0, 0, 0},
+                          {1, 1, 1},
+                          {0, 0, 0},
+                          {0, 0, 0});
+            }
+        }
     }
 }
 
@@ -76,68 +84,13 @@ void SlothEngine::loadObject(int entityId,
     float mass = 1;
     KineticPhysicalProperties kinetics = KineticPhysicalProperties{mass, velocity, acceleration};
     
-    VertexData data[] = {
-            // Front face
-            {{-0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
-            {{0.5, -0.5, 0.5, 1.0}, {1.0, 0.0}},
-            {{0.5, 0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, 0.5, 1.0}, {0.0, 1.0}},
-            {{-0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
-
-            // Back face
-            {{0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-            {{-0.5, -0.5, -0.5, 1.0}, {1.0, 0.0}},
-            {{-0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {0.0, 1.0}},
-            {{0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-
-            // Top face
-            {{-0.5, 0.5, 0.5, 1.0}, {0.0, 0.0}},
-            {{0.5, 0.5, 0.5, 1.0}, {1.0, 0.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, -0.5, 1.0}, {0.0, 1.0}},
-            {{-0.5, 0.5, 0.5, 1.0}, {0.0, 0.0}},
-
-            // Bottom face
-            {{-0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-            {{0.5, -0.5, -0.5, 1.0}, {1.0, 0.0}},
-            {{0.5, -0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, -0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, -0.5, 0.5, 1.0}, {0.0, 1.0}},
-            {{-0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-
-            // Left face
-            {{-0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-            {{-0.5, -0.5, 0.5, 1.0}, {1.0, 0.0}},
-            {{-0.5, 0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, 0.5, 1.0}, {1.0, 1.0}},
-            {{-0.5, 0.5, -0.5, 1.0}, {0.0, 1.0}},
-            {{-0.5, -0.5, -0.5, 1.0}, {0.0, 0.0}},
-
-            // Right face
-            {{0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
-            {{0.5, -0.5, -0.5, 1.0}, {1.0, 0.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, -0.5, 1.0}, {1.0, 1.0}},
-            {{0.5, 0.5, 0.5, 1.0}, {0.0, 1.0}},
-            {{0.5, -0.5, 0.5, 1.0}, {0.0, 0.0}},
-        };
     
     componentManager->register_transform(entityId, transform);
     componentManager->register_kinetic_physical_properties(entityId, kinetics);
-    
-    Texture* texture = new Texture("assets/anya.jpg", metalDevice);
     componentManager->register_texture(entityId, texture);
-
+    componentManager->register_geometry(entityId, vertexBuffer);
     
-    MTL::Buffer* cubeVerteces = metalDevice->newBuffer(&data, sizeof(data), MTL::ResourceStorageModeShared);
-    cubeVertexBuffers.insert({entityId, cubeVerteces});
-    transformationBuffers.insert({entityId, metalDevice->newBuffer(sizeof(TransformationData), MTL::ResourceStorageModeShared)});
-    componentManager->register_geometry(entityId, cubeVerteces);
-
+//    transformationBuffers.insert({entityId, metalDevice->newBuffer(sizeof(TransformationData), MTL::ResourceStorageModeShared)});
 }
 
 void SlothEngine::run() {
@@ -145,7 +98,7 @@ void SlothEngine::run() {
         std::chrono::time_point now = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameTime);
         float deltaTime = duration.count() / 1000.0;
-        physicsSystem->update_loaded_entities(deltaTime);
+//        physicsSystem->update_loaded_entities(deltaTime);
         renderingSystem->run(camera);
         glfwPollEvents();
         lastFrameTime = now;
@@ -166,4 +119,5 @@ void SlothEngine::cleanup() {
     delete componentManager;
     delete renderingSystem;
     delete physicsSystem;
+    delete texture;
 }
