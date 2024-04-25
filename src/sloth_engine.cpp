@@ -43,10 +43,8 @@ void SlothEngine::createCamera() {
     //           simd::float3 front    = simd::float3{0.0f, 0.0f, -1.0f});
     int c = cbrt(static_cast<double>(componentManager->getNumEntities()));
     simd::float3 position   = simd::float3{c * 1.0f, c * 1.0f,  c * 3.0f};
-    simd::float3 up         = simd::float3{0.0f, 1.0f,  0.0f};
-    simd::float3 right      = simd::float3{1.0f, 0.0f,  0.0f};
-    simd::float3 front      = simd::float3{0.0f, 0.0f,  -1.0f};
-    camera = new Camera(position, up, right, front);
+    simd::float3 target     = simd::float3{0.0, 0.0f, 0.0f};
+    camera = new Camera(position, target);
 }
 
 void SlothEngine::loadScene() {
