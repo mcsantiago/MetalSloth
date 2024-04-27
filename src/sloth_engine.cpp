@@ -96,6 +96,24 @@ void SlothEngine::run() {
         std::chrono::time_point now = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameTime);
         float deltaTime = duration.count() / 1000.0;
+        // TODO: encapsulate this in to an event queue?
+        camera->update();
+        if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS) {
+            camera->position += camera->front * camera->cameraSpeed * deltaTime;
+        }
+        else if(glfwGetKey(glfwWindow, GLFW_KEY_S) == GLFW_PRESS) {
+            camera->position -= camera->front * camera->cameraSpeed * deltaTime;
+        }
+        else if(glfwGetKey(glfwWindow, GLFW_KEY_A) == GLFW_PRESS) {
+            simd::float3 right = simd::normalize(simd::cross(simd::float3{0,1,0}, camera->front));
+            simd::float3 worldUp = simd::float3{0.0f, 1.0f, 0.0f};
+            simd::float3 up = simd::cross(camera->front, right);
+            camera->position -= right * camera->cameraSpeed * deltaTime;
+        }
+        else if(glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS) {
+            simd::float3 right = simd::normalize(simd::cross(simd::float3{0,1,0}, camera->front));
+            camera->position += right * camera->cameraSpeed * deltaTime;
+        }
 //        physicsSystem->update_loaded_entities(deltaTime);
         renderingSystem->run(camera);
         glfwPollEvents();

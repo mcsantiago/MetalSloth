@@ -14,17 +14,19 @@ class Camera {
 public:
     simd::float3 position;
     simd::float3 target;
+    simd::float3 front;
+    simd::float3 right;
+
+    float cameraSpeed = 50.0f;
     
     // TODO: encapsulate these properly
     float fov = 90 * (M_PI / 180.0f);
     float nearZ = 0.1f;
     float farZ = 100.0f;
     
-    simd::float3 worldUp;
+    Camera(simd::float3 position, simd::float3 target);
     
-    Camera(simd::float3 position,
-           simd::float3 target);
-    
+    void update();
     matrix_float4x4 generate_view_matrix() const;
 };
 
