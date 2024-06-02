@@ -7,7 +7,6 @@
 
 #include "camera.hpp"
 #include "AAPLMathUtilities.h"
-#include <cmath>
 #include <iostream>
 
 Camera::Camera(simd::float3 position) : position(position) {}
