@@ -8,9 +8,13 @@
 #ifndef sloth_engine_hpp
 #define sloth_engine_hpp
 
+#define GLFW_INCLUDE_NONE
+#import <GLFW/glfw3.h>
+
 #include <Metal/Metal.hpp>
 #include <chrono>
 #include <unordered_map>
+#include "glfw_bridge.hpp"
 #include "mtl_engine.hpp"
 #include "physics_engine.hpp"
 #include "vertex_data.h"
@@ -32,6 +36,7 @@ private:
     
     NS::AutoreleasePool* pPool;
     Camera* camera;
+    float lastX, lastY;
     
     VertexData vertexData[36] = {
             // Front face
@@ -89,13 +94,16 @@ private:
     void initWindow();
     void initDevice();
     void initSystems();
-    void loadObject(int entityId, 
+    void initGlfwCallbacks();
+    void loadObject(int entityId,
                     simd::float3 position,
                     simd::float3 rotation,
                     simd::float3 scale,
                     simd::float3 velocity,
                     simd::float3 acceleration);
     void createCamera();
+    
+    static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 
 public:

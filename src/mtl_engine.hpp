@@ -14,7 +14,6 @@
 #include "AAPLMathUtilities.h"
 #include "vertex_data.h"
 #include "texture.hpp"
-#include "glfw_bridge.hpp"
 #include "camera.hpp"
 #include "component_manager.hpp"
 #include <stb/stb_image.h>

@@ -168,7 +168,6 @@ void MTLEngine::swapBuffers() {
 }
 
 void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder, int entityId, Camera* camera) {
-    // Moves the Cube 2 units down the negative Z-axis
     Transform* transform = componentManager->get_transform(entityId);
     matrix_float4x4 translationMatrix = matrix4x4_translation(transform->position);
 

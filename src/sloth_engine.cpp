@@ -13,6 +13,7 @@ void SlothEngine::init() {
     initWindow();
     initSystems();
     loadScene();
+    initGlfwCallbacks();
 }
 
 void SlothEngine::initDevice() {
@@ -36,6 +37,12 @@ void SlothEngine::initWindow() {
     }
 }
 
+void SlothEngine::initGlfwCallbacks() {
+    glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetWindowUserPointer(glfwWindow, camera);
+    glfwSetCursorPosCallback(glfwWindow, camera->updateFrontFromScreenCoords);
+}
+
 void SlothEngine::createCamera() {
     //    Camera(simd::float3 position = simd::float3{0.0f, 0.0f,  0.0f},
     //           simd::float3 up       = simd::float3{0.0f, 1.0f,  0.0f},
@@ -43,8 +50,7 @@ void SlothEngine::createCamera() {
     //           simd::float3 front    = simd::float3{0.0f, 0.0f, -1.0f});
     int c = cbrt(static_cast<double>(componentManager->getNumEntities()));
     simd::float3 position   = simd::float3{c * 1.0f, c * 1.0f,  c * 3.0f};
-    simd::float3 target     = simd::float3{0.0, 0.0f, 0.0f};
-    camera = new Camera(position, target);
+    camera = new Camera(position);
 }
 
 void SlothEngine::loadScene() {
@@ -105,9 +111,7 @@ void SlothEngine::run() {
             camera->position -= camera->front * camera->cameraSpeed * deltaTime;
         }
         else if(glfwGetKey(glfwWindow, GLFW_KEY_A) == GLFW_PRESS) {
-            simd::float3 right = simd::normalize(simd::cross(simd::float3{0,1,0}, camera->front));
-            simd::float3 worldUp = simd::float3{0.0f, 1.0f, 0.0f};
-            simd::float3 up = simd::cross(camera->front, right);
+            simd::float3 right = simd::normalize(simd::cross(simd::float3{0.0f, 1.0f, 0.0f}, camera->front));
             camera->position -= right * camera->cameraSpeed * deltaTime;
         }
         else if(glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS) {
