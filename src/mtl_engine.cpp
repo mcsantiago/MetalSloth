@@ -49,7 +49,8 @@ void MTLEngine::run(Camera* camera) {
     renderCommandEncoder->setVertexBuffer(transformationBuffer, 0, 1);
     MTL::PrimitiveType typeTriangle = MTL::PrimitiveTypeTriangle;
     NS::UInteger vertexStart = 0;
-    NS::UInteger vertexCount = 36;
+    
+    NS::UInteger vertexCount = 84816;
     renderCommandEncoder->setFragmentTexture(textureData->texture, 0);
     renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, vertexCount, componentManager->getNumEntities());
     renderCommandEncoder->endEncoding();
@@ -93,16 +94,16 @@ void MTLEngine::createTriangle() {
 }
 
 void MTLEngine::createSquare() {
-    VertexData squareVertices[] {
-        {{-0.5, -0.5,  0.5, 1.0f}, {0.0f, 0.0f}},
-        {{-0.5,  0.5,  0.5, 1.0f}, {0.0f, 1.0f}},
-        {{ 0.5,  0.5,  0.5, 1.0f}, {1.0f, 1.0f}},
-        {{-0.5, -0.5,  0.5, 1.0f}, {0.0f, 0.0f}},
-        {{ 0.5,  0.5,  0.5, 1.0f}, {1.0f, 1.0f}},
-        {{ 0.5, -0.5,  0.5, 1.0f}, {1.0f, 0.0f}}
-    };
+//    VertexData squareVertices[] {
+//        {{-0.5, -0.5,  0.5, 1.0f}, {0.0f, 0.0f}},
+//        {{-0.5,  0.5,  0.5, 1.0f}, {0.0f, 1.0f}},
+//        {{ 0.5,  0.5,  0.5, 1.0f}, {1.0f, 1.0f}},
+//        {{-0.5, -0.5,  0.5, 1.0f}, {0.0f, 0.0f}},
+//        {{ 0.5,  0.5,  0.5, 1.0f}, {1.0f, 1.0f}},
+//        {{ 0.5, -0.5,  0.5, 1.0f}, {1.0f, 0.0f}}
+//    };
 
-    vertexBuffer = metalDevice->newBuffer(&squareVertices, sizeof(squareVertices), MTL::ResourceStorageModeShared);
+//    vertexBuffer = metalDevice->newBuffer(&squareVertices, sizeof(squareVertices), MTL::ResourceStorageModeShared);
 
 //    anyaTexture = new Texture("assets/anya.jpg", metalDevice);
 }
@@ -172,13 +173,14 @@ void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEnco
     matrix_float4x4 translationMatrix = matrix4x4_translation(transform->position);
 
     // TODO: Introduce physics system
-    float angleInDegrees = glfwGetTime()/2.0 * 90;
-    float angleInRadians = angleInDegrees * M_PI / 180.0f;
-    matrix_float4x4 rotationMatrix = matrix4x4_rotation(angleInRadians, 1.0, 1.0, 0.0);
-    matrix_float4x4 scaleMatrix = matrix4x4_scale(transform->scale);
-
-    matrix_float4x4 modelMatrix = simd_mul(translationMatrix, scaleMatrix);
-    modelMatrix = simd_mul(modelMatrix, rotationMatrix);
+//    float angleInDegrees = glfwGetTime()/2.0 * 90;
+//    float angleInRadians = angleInDegrees * M_PI / 180.0f;
+//    matrix_float4x4 rotationMatrix = matrix4x4_rotation(angleInRadians, 1.0, 1.0, 0.0);
+//    matrix_float4x4 scaleMatrix = matrix4x4_scale(transform->scale);
+//
+//    matrix_float4x4 modelMatrix = simd_mul(translationMatrix, scaleMatrix);
+//    modelMatrix = simd_mul(modelMatrix, rotationMatrix);
+    matrix_float4x4 modelMatrix = translationMatrix;
 
     matrix_float4x4 viewMatrix = camera->generate_view_matrix();
     

@@ -30,7 +30,7 @@ class ComponentManager {
 private:
     std::unordered_map<int, Transform> transforms;
     std::unordered_map<int, KineticPhysicalProperties> kinetics;
-    std::unordered_map<int, MTL::Buffer*> geometryData;
+    std::unordered_map<int, std::vector<MTL::Buffer*>> geometryData;
     std::unordered_map<int, Texture*> textureData;
 public:
     int register_transform(int entityId, Transform);
@@ -39,7 +39,7 @@ public:
     int register_texture(int entityId, Texture* texture);
     
     int getNumEntities() {
-        return 8000;
+        return 1;
     }
     void cleanup();
 

@@ -18,7 +18,7 @@ int ComponentManager::register_kinetic_physical_properties(int entityId, Kinetic
 }
 
 int ComponentManager::register_geometry(int entityId, MTL::Buffer* data) {
-    geometryData.insert({entityId, data});
+    geometryData[entityId].push_back(data);
     return entityId;
 }
 
@@ -47,8 +47,8 @@ MTL::Buffer* ComponentManager::get_geometry(int entityId) {
     if (!geometryData.contains(entityId)) {
         return nullptr;
     }
-    
-    return geometryData[entityId];
+    // TODO: consider entities with multiple meshes
+    return geometryData[entityId][0];
 }
 
 Texture* ComponentManager::get_texture(int entityId) {

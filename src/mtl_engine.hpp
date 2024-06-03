@@ -51,7 +51,7 @@ private:
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
     void resizeFrameBuffer(int width, int height);
     
-    TransformationData transformationData[8000];
+    TransformationData transformationData[1];
     MTL::Device* metalDevice;
     GLFWwindow* glfwWindow;
     CA::MetalDrawable* metalDrawable;

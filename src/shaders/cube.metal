@@ -15,6 +15,7 @@ struct VertexOut {
     // is the clip space position of the vertex when this structure is
     // returned from the vertex function.
     float4 position [[position]];
+    float3 normal [[normal]];
 
     // Since this member does not have a special attribute, the rasterizer
     // interpolates its value with the values of the other triangle vertices

@@ -56,21 +56,127 @@ void SlothEngine::createCamera() {
 void SlothEngine::loadScene() {
     createCamera();
     int c = cbrt(static_cast<double>(componentManager->getNumEntities()));
-    texture = new Texture("assets/anya.jpg", metalDevice);
-    vertexBuffer = metalDevice->newBuffer(&vertexData, sizeof(vertexData), MTL::ResourceStorageModeShared);
+//    texture = new Texture("assets/anya.jpg", metalDevice);
     int n = 0;
-    for (int i = 0; i < c; i++) {
-        for (int j = 0; j < c; j++) {
-            for (int k = 0; k < c; k++) {
-                loadObject(n++,
-                          {i * 2.0f, j * 2.0f, k * 2.0f},
-                          {0, 0, 0},
-                          {1, 1, 1},
-                          {0, 0, 0},
-                          {0, 0, 0});
-            }
+    ufbx_error error;
+    ufbx_scene* scene = ufbx_load_file("assets/X Bot.fbx", NULL, &error);
+    if (!scene) {
+        fprintf(stderr, "Failed to load: %s\n", error.description.data);
+        exit(1);
+    }
+    for (size_t i = 0; i < scene->nodes.count; i++) {
+        ufbx_node *node = scene->nodes.data[i];
+        if (node->is_root) continue;
+
+        printf("Object: %s\n", node->name.data);
+        if (node->mesh) {
+            loadPolygons(0, node->mesh);
+            printf("-> mesh with %zu faces\n", node->mesh->faces.count);
         }
     }
+    ufbx_free_scene(scene);
+    
+    loadObject(0,
+               {0.0f, 0.0f, 0.0f},
+               {0.0f, 0.0f, 0.0f},
+               {1.0f, 1.0f, 1.0f},
+               {0.0f, 0.0f, 0.0f},
+               {0.0f, 0.0f, 0.0f});
+//    for (int i = 0; i < c; i++) {
+//        for (int j = 0; j < c; j++) {
+//            for (int k = 0; k < c; k++) {
+//                loadObject(n++,
+//                          {i * 2.0f, j * 2.0f, k * 2.0f},
+//                          {0, 0, 0},
+//                          {1, 1, 1},
+//                          {0, 0, 0},
+//                          {0, 0, 0});
+//            }
+//        }
+//    }
+}
+
+void SlothEngine::loadPolygons(int entityId, ufbx_mesh *mesh) {
+    // The vertex buffer is allocated in heap, the component manager should release it.
+    // Maybe an atomic reference counter would be necessary, but for now I will only free memory
+    // once the component_manager is freed.
+    
+    size_t n = mesh->faces.count;
+    std::vector<VertexData> triangles;
+    for (size_t i = 0; i < n; i++) {
+        ufbx_face face = mesh->faces.data[i];
+        
+        if (face.num_indices == 3) {
+            for (uint32_t corner = 0; corner < face.num_indices; corner++) {
+                uint32_t index = face.index_begin + corner;
+                ufbx_vec3 position = mesh->vertex_position[index];
+                ufbx_vec3 normal = mesh->vertex_normal[index];
+                ufbx_vec2 uv = mesh->vertex_uv[index];
+                
+                VertexData point = {
+                    {(float)position.x, (float)position.y, (float)position.z, 1.0f},
+                    {(float)normal.x, (float)normal.y, (float)normal.z},
+                    {(float)uv.x, (float)uv.y}
+                };
+                triangles.push_back(point);
+            }
+        } else if (face.num_indices == 4) {
+            // TODO: I'm sure there's a nice way to write this function.
+            uint32_t offset = face.index_begin;
+            ufbx_vec3 position0 = mesh->vertex_position[offset];
+            ufbx_vec3 normal0 = mesh->vertex_normal[offset];
+            ufbx_vec2 uv0 = mesh->vertex_uv[offset];
+            
+            ufbx_vec3 position1 = mesh->vertex_position[offset + 1];
+            ufbx_vec3 normal1 = mesh->vertex_normal[offset + 1];
+            ufbx_vec2 uv1 = mesh->vertex_uv[offset + 1];
+            
+            ufbx_vec3 position2 = mesh->vertex_position[offset + 2];
+            ufbx_vec3 normal2 = mesh->vertex_normal[offset + 2];
+            ufbx_vec2 uv2 = mesh->vertex_uv[offset + 2];
+            
+            ufbx_vec3 position3 = mesh->vertex_position[offset + 3];
+            ufbx_vec3 normal3 = mesh->vertex_normal[offset + 3];
+            ufbx_vec2 uv3 = mesh->vertex_uv[offset + 3];
+
+            triangles.push_back({
+                {(float)position0.x, (float)position0.y, (float)position0.z, 1.0f},
+                {(float)normal0.x, (float)normal0.y, (float)normal0.z},
+                {(float)uv0.x, (float)uv0.y}
+            });
+            triangles.push_back({
+                {(float)position1.x, (float)position1.y, (float)position1.z, 1.0f},
+                {(float)normal1.x, (float)normal1.y, (float)normal1.z},
+                {(float)uv1.x, (float)uv1.y}
+            });
+            triangles.push_back({
+                {(float)position2.x, (float)position2.y, (float)position2.z, 1.0f},
+                {(float)normal2.x, (float)normal2.y, (float)normal2.z},
+                {(float)uv2.x, (float)uv2.y}
+            });
+            
+            triangles.push_back({
+                {(float)position0.x, (float)position0.y, (float)position0.z, 1.0f},
+                {(float)normal0.x, (float)normal0.y, (float)normal0.z},
+                {(float)uv0.x, (float)uv0.y}
+            });
+            triangles.push_back({
+                {(float)position2.x, (float)position2.y, (float)position2.z, 1.0f},
+                {(float)normal2.x, (float)normal2.y, (float)normal2.z},
+                {(float)uv2.x, (float)uv2.y}
+            });
+            triangles.push_back({
+                {(float)position3.x, (float)position3.y, (float)position3.z, 1.0f},
+                {(float)normal3.x, (float)normal3.y, (float)normal3.z},
+                {(float)uv3.x, (float)uv3.y}
+            });
+        }
+    }
+    vertexBuffer = metalDevice->newBuffer(triangles.data(),
+                                          sizeof(VertexData) * triangles.size(),
+                                          MTL::ResourceStorageModeShared);
+
+    componentManager->register_geometry(entityId, vertexBuffer);
 }
 
 void SlothEngine::loadObject(int entityId, 
@@ -92,7 +198,6 @@ void SlothEngine::loadObject(int entityId,
     componentManager->register_transform(entityId, transform);
     componentManager->register_kinetic_physical_properties(entityId, kinetics);
     componentManager->register_texture(entityId, texture);
-    componentManager->register_geometry(entityId, vertexBuffer);
     
 //    transformationBuffers.insert({entityId, metalDevice->newBuffer(sizeof(TransformationData), MTL::ResourceStorageModeShared)});
 }

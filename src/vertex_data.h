@@ -14,6 +14,7 @@ using namespace simd;
 
 struct VertexData {
     float4 position;
+    float3 normal;
     float2 textureCoordinate;
 };
 
