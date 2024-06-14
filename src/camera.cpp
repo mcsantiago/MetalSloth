@@ -13,7 +13,7 @@ Camera::Camera(simd::float3 position) : position(position) {}
 
 void Camera::update() {
     simd::float3 tmp_front;
-    std::cout << yaw << " " << pitch << std::endl;
+//    std::cout << yaw << " " << pitch << std::endl;
     tmp_front.x = cos(radians_from_degrees(yaw)) * cos(radians_from_degrees(pitch));
     tmp_front.y = sin(radians_from_degrees(pitch));
     tmp_front.z = sin(radians_from_degrees(yaw)) * cos(radians_from_degrees(pitch));
