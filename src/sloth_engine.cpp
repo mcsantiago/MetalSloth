@@ -23,7 +23,7 @@ void SlothEngine::initDevice() {
 
 void SlothEngine::initSystems() {
     componentManager = new ComponentManager();
-    renderingSystem = new MTLEngine(componentManager, metalDevice, glfwWindow);
+    renderingSystem = new MTLRenderingSystem(componentManager, metalDevice, glfwWindow);
     physicsSystem = new PhysicsSystem(componentManager, metalDevice);
     renderingSystem->init();
 }

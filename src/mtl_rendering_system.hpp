@@ -24,9 +24,9 @@
 
 enum RenderMode { full, wireframe };
 
-class MTLEngine {
+class MTLRenderingSystem {
 public:
-    MTLEngine(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow);
+    MTLRenderingSystem(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow);
     void init();
     void run(Camera* camera, RenderMode renderMode);
     void swapBuffers();

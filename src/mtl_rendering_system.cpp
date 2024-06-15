@@ -5,18 +5,18 @@
 //  Created by Mac on 4/8/24.
 //
 
-#include "mtl_engine.hpp"
+#include "mtl_rendering_system.hpp"
 #include "camera.hpp"
 #include <simd/simd.h>
 #include <iostream>
 
-MTLEngine::MTLEngine(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow) {
+MTLRenderingSystem::MTLRenderingSystem(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow) {
     this->componentManager = manager;
     this->metalDevice = metalDevice;
     this->glfwWindow = glfwWindow;
 }
 
-void MTLEngine::init() {
+void MTLRenderingSystem::init() {
     initWindow();
     
     createBuffers();
@@ -27,7 +27,7 @@ void MTLEngine::init() {
     createRenderPassDescriptor();
 }
 
-void MTLEngine::run(Camera* camera, RenderMode renderMode) {
+void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     pPool = NS::AutoreleasePool::alloc()->init();
     MTL::Buffer* geometryData = componentManager->get_geometry(0);
     Texture* textureData = componentManager->get_texture(0);
@@ -71,7 +71,7 @@ void MTLEngine::run(Camera* camera, RenderMode renderMode) {
     pPool->release();
 }
 
-void MTLEngine::cleanup() {
+void MTLRenderingSystem::cleanup() {
     // componentManager will be cleaned up by SlothEngine
     glfwTerminate();
     transformationBuffer->release();
@@ -81,7 +81,7 @@ void MTLEngine::cleanup() {
 }
 
 
-void MTLEngine::initWindow() {
+void MTLRenderingSystem::initWindow() {
     glfwSetWindowUserPointer(glfwWindow, this);
     glfwSetFramebufferSizeCallback(glfwWindow, frameBufferSizeCallback);
     
@@ -93,7 +93,7 @@ void MTLEngine::initWindow() {
     metalDrawable = layer->nextDrawable();
 }
 
-void MTLEngine::createTriangle() {
+void MTLRenderingSystem::createTriangle() {
     simd::float3 triangleVertices[] = {
         {-0.5f, -0.5f, 0.0f},
         { 0.5f, -0.5f, 0.0f},
@@ -106,7 +106,7 @@ void MTLEngine::createTriangle() {
     
 }
 
-void MTLEngine::createSquare() {
+void MTLRenderingSystem::createSquare() {
 //    VertexData squareVertices[] {
 //        {{-0.5, -0.5,  0.5, 1.0f}, {0.0f, 0.0f}},
 //        {{-0.5,  0.5,  0.5, 1.0f}, {0.0f, 1.0f}},
@@ -121,7 +121,7 @@ void MTLEngine::createSquare() {
 //    anyaTexture = new Texture("assets/anya.jpg", metalDevice);
 }
 
-void MTLEngine::createDefaultLibrary() {
+void MTLRenderingSystem::createDefaultLibrary() {
     metalDefaultLibrary = metalDevice->newDefaultLibrary();
     if (!metalDefaultLibrary) {
         std::cerr << "Failed to load default library.";
@@ -129,11 +129,11 @@ void MTLEngine::createDefaultLibrary() {
     }
 }
 
-void MTLEngine::createCommandQueue() {
+void MTLRenderingSystem::createCommandQueue() {
     metalCommandQueue = metalDevice->newCommandQueue();
 }
 
-void MTLEngine::createRenderPipeline() {
+void MTLRenderingSystem::createRenderPipeline() {
     MTL::Function* vertexShader = metalDefaultLibrary->newFunction(NS::String::string("vertexShader", NS::ASCIIStringEncoding));
     assert(vertexShader);
     MTL::Function* fragmentShader = metalDefaultLibrary->newFunction(NS::String::string("fragmentShader", NS::ASCIIStringEncoding));
@@ -167,21 +167,21 @@ void MTLEngine::createRenderPipeline() {
     depthStencilDescriptor->release();
 }
 
-void MTLEngine::draw(int entityId, Camera* camera, MTL::RenderCommandEncoder* encoder) {
+void MTLRenderingSystem::draw(int entityId, Camera* camera, MTL::RenderCommandEncoder* encoder) {
     sendRenderCommand(entityId, camera, encoder);
 }
 
-void MTLEngine::sendRenderCommand(int entityId, Camera* camera, MTL::RenderCommandEncoder* renderCommandEncoder) {
+void MTLRenderingSystem::sendRenderCommand(int entityId, Camera* camera, MTL::RenderCommandEncoder* renderCommandEncoder) {
     encodeRenderCommand(renderCommandEncoder, entityId, camera);
 }
 
-void MTLEngine::swapBuffers() {
+void MTLRenderingSystem::swapBuffers() {
     metalCommandBuffer->presentDrawable(metalDrawable);
     metalCommandBuffer->commit();
     metalCommandBuffer->waitUntilCompleted();
 }
 
-void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder, int entityId, Camera* camera) {
+void MTLRenderingSystem::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder, int entityId, Camera* camera) {
     Transform* transform = componentManager->get_transform(entityId);
     matrix_float4x4 translationMatrix = matrix4x4_translation(transform->position);
 
@@ -204,12 +204,12 @@ void MTLEngine::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEnco
     transformationData[entityId] = { modelMatrix, viewMatrix, perspectiveMatrix };
 }
 
-void MTLEngine::frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
-    MTLEngine* engine = (MTLEngine*)glfwGetWindowUserPointer(window);
+void MTLRenderingSystem::frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
+    MTLRenderingSystem* engine = (MTLRenderingSystem*)glfwGetWindowUserPointer(window);
     engine->resizeFrameBuffer(width, height);
 }
 
-void MTLEngine::resizeFrameBuffer(int width, int height) {
+void MTLRenderingSystem::resizeFrameBuffer(int width, int height) {
     layer->drawableSize() = CGSizeMake(width, height);
     // Deallocate the textures if they have been created
     if (msaaRenderTargetTexture) {
@@ -225,11 +225,11 @@ void MTLEngine::resizeFrameBuffer(int width, int height) {
     updateRenderPassDescriptor();
 }
 
-void MTLEngine::createBuffers() {
+void MTLRenderingSystem::createBuffers() {
     transformationBuffer = metalDevice->newBuffer(sizeof(transformationData), MTL::ResourceStorageModeShared);
 }
 
-void MTLEngine::createDepthAndMSAATextures() {
+void MTLRenderingSystem::createDepthAndMSAATextures() {
     MTL::TextureDescriptor* msaaTextureDescriptor = MTL::TextureDescriptor::alloc()->init();
     msaaTextureDescriptor->setTextureType(MTL::TextureType2DMultisample);
     msaaTextureDescriptor->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
@@ -254,7 +254,7 @@ void MTLEngine::createDepthAndMSAATextures() {
     depthTextureDescriptor->release();
 }
 
-void MTLEngine::createRenderPassDescriptor() {
+void MTLRenderingSystem::createRenderPassDescriptor() {
     renderPassDescriptor = MTL::RenderPassDescriptor::alloc()->init();
 
     MTL::RenderPassColorAttachmentDescriptor* colorAttachment = renderPassDescriptor->colorAttachments()->object(0);
@@ -272,7 +272,7 @@ void MTLEngine::createRenderPassDescriptor() {
     depthAttachment->setClearDepth(1.0);
 }
 
-void MTLEngine::updateRenderPassDescriptor() {
+void MTLRenderingSystem::updateRenderPassDescriptor() {
     MTL::RenderPassColorAttachmentDescriptor* colorAttachment = renderPassDescriptor->colorAttachments()->object(0);
     MTL::RenderPassDepthAttachmentDescriptor* depthAttachment = renderPassDescriptor->depthAttachment();
     

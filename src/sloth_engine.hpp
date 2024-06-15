@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <iostream>
 #include "glfw_bridge.hpp"
-#include "mtl_engine.hpp"
+#include "mtl_rendering_system.hpp"
 #include "physics_engine.hpp"
 #include "vertex_data.h"
 #include "texture.hpp"
@@ -24,7 +24,7 @@
 
 class SlothEngine {
 private:
-    MTLEngine* renderingSystem;
+    MTLRenderingSystem* renderingSystem;
     PhysicsSystem* physicsSystem;
     ComponentManager* componentManager;
     
