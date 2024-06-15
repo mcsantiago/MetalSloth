@@ -14,6 +14,7 @@
 #include <Metal/Metal.hpp>
 #include <chrono>
 #include <unordered_map>
+#include <iostream>
 #include "glfw_bridge.hpp"
 #include "mtl_engine.hpp"
 #include "physics_engine.hpp"
@@ -96,14 +97,18 @@ private:
     void initDevice();
     void initSystems();
     void initGlfwCallbacks();
+    
+    // Model loading
+    void loadFbxFile();
+    void loadPolygons(int entityId, ufbx_mesh *mesh);
     void loadObject(int entityId,
                     simd::float3 position,
                     simd::float3 rotation,
                     simd::float3 scale,
                     simd::float3 velocity,
                     simd::float3 acceleration);
+    
     void createCamera();
-    void loadPolygons(int entityId, ufbx_mesh *mesh);
     
     static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 

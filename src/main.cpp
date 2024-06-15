@@ -5,9 +5,7 @@
 //  Created by Mac on 4/7/24.
 //
 
-#include <iostream>
 #include "sloth_engine.hpp"
-
 
 int main(int argc, const char * argv[]) {
     SlothEngine engine;

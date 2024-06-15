@@ -7,6 +7,7 @@
 
 #include "sloth_engine.hpp"
 #include <cmath>
+#include <iostream>
 
 void SlothEngine::init() {
     initDevice();
@@ -55,10 +56,19 @@ void SlothEngine::createCamera() {
 
 void SlothEngine::loadScene() {
     createCamera();
-    int c = cbrt(static_cast<double>(componentManager->getNumEntities()));
 //    texture = new Texture("assets/anya.jpg", metalDevice);
-    int n = 0;
+    loadFbxFile();
+    loadObject(0,
+               {0.0f, 0.0f, 0.0f},
+               {0.0f, 0.0f, 0.0f},
+               {1.0f, 1.0f, 1.0f},
+               {0.0f, 0.0f, 0.0f},
+               {0.0f, 0.0f, 0.0f});
+}
+
+void SlothEngine::loadFbxFile() {
     ufbx_error error;
+    
     ufbx_scene* scene = ufbx_load_file("assets/X Bot.fbx", NULL, &error);
     if (!scene) {
         fprintf(stderr, "Failed to load: %s\n", error.description.data);
@@ -74,26 +84,19 @@ void SlothEngine::loadScene() {
             printf("-> mesh with %zu faces\n", node->mesh->faces.count);
         }
     }
+    for (size_t i = 0; i < scene->materials.count; i++) {
+        ufbx_material *material = scene->materials.data[i];
+        std::cout << "Material: " << material->name.data << std::endl;
+        std::cout << "Texture count: " << material->textures.count << std::endl;
+
+        for (size_t j = 0; j < material->textures.count; ++j) {
+            ufbx_texture *texture = material->textures.data[j].texture;
+            if (texture && texture->filename.length > 0) {
+                std::cout << "  Texture: " << texture->filename.data << std::endl;
+            }
+        }
+    }
     ufbx_free_scene(scene);
-    
-    loadObject(0,
-               {0.0f, 0.0f, 0.0f},
-               {0.0f, 0.0f, 0.0f},
-               {1.0f, 1.0f, 1.0f},
-               {0.0f, 0.0f, 0.0f},
-               {0.0f, 0.0f, 0.0f});
-//    for (int i = 0; i < c; i++) {
-//        for (int j = 0; j < c; j++) {
-//            for (int k = 0; k < c; k++) {
-//                loadObject(n++,
-//                          {i * 2.0f, j * 2.0f, k * 2.0f},
-//                          {0, 0, 0},
-//                          {1, 1, 1},
-//                          {0, 0, 0},
-//                          {0, 0, 0});
-//            }
-//        }
-//    }
 }
 
 void SlothEngine::loadPolygons(int entityId, ufbx_mesh *mesh) {
