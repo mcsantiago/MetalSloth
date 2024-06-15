@@ -45,10 +45,6 @@ void SlothEngine::initGlfwCallbacks() {
 }
 
 void SlothEngine::createCamera() {
-    //    Camera(simd::float3 position = simd::float3{0.0f, 0.0f,  0.0f},
-    //           simd::float3 up       = simd::float3{0.0f, 1.0f,  0.0f},
-    //           simd::float3 right    = simd::float3{1.0f, 0.0f,  0.0f},
-    //           simd::float3 front    = simd::float3{0.0f, 0.0f, -1.0f});
     int c = cbrt(static_cast<double>(componentManager->getNumEntities()));
     simd::float3 position   = simd::float3{c * 1.0f, c * 1.0f,  c * 3.0f};
     camera = new Camera(position);
@@ -57,7 +53,7 @@ void SlothEngine::createCamera() {
 void SlothEngine::loadScene() {
     createCamera();
 //    texture = new Texture("assets/anya.jpg", metalDevice);
-    loadFbxFile();
+    loadFbxFile("assets/X Bot.fbx");
     loadObject(0,
                {0.0f, 0.0f, 0.0f},
                {0.0f, 0.0f, 0.0f},
@@ -66,10 +62,10 @@ void SlothEngine::loadScene() {
                {0.0f, 0.0f, 0.0f});
 }
 
-void SlothEngine::loadFbxFile() {
+void SlothEngine::loadFbxFile(const char *filename) {
     ufbx_error error;
     
-    ufbx_scene* scene = ufbx_load_file("assets/X Bot.fbx", NULL, &error);
+    ufbx_scene* scene = ufbx_load_file(filename, NULL, &error);
     if (!scene) {
         fprintf(stderr, "Failed to load: %s\n", error.description.data);
         exit(1);
@@ -226,8 +222,15 @@ void SlothEngine::run() {
             simd::float3 right = simd::normalize(simd::cross(simd::float3{0,1,0}, camera->front));
             camera->position += right * camera->cameraSpeed * deltaTime;
         }
+        else if(glfwGetKey(glfwWindow, GLFW_KEY_Q) == GLFW_PRESS) {
+            if (renderMode == full) {
+                renderMode = wireframe;
+            } else {
+                renderMode = full;
+            }
+        }
 //        physicsSystem->update_loaded_entities(deltaTime);
-        renderingSystem->run(camera);
+        renderingSystem->run(camera, renderMode);
         glfwPollEvents();
         lastFrameTime = now;
     }
@@ -238,14 +241,9 @@ void SlothEngine::cleanup() {
     physicsSystem->cleanup();
     metalDevice->release();
     
-//    for (auto it = cubeVertexBuffers.begin(); it != cubeVertexBuffers.end(); ++it) {
-//        if (it->second != nullptr)
-//            delete it->second;
-//    }
-    
     delete camera;
     delete componentManager;
     delete renderingSystem;
     delete physicsSystem;
-    delete texture;
+//    delete texture;
 }

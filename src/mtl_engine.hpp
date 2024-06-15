@@ -22,11 +22,13 @@
 #include <QuartzCore/QuartzCore.hpp>
 #include <filesystem>
 
+enum RenderMode { full, wireframe };
+
 class MTLEngine {
 public:
     MTLEngine(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow);
     void init();
-    void run(Camera* camera);
+    void run(Camera* camera, RenderMode renderMode);
     void swapBuffers();
     void cleanup();
     

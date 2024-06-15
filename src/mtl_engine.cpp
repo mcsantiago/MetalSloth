@@ -27,7 +27,7 @@ void MTLEngine::init() {
     createRenderPassDescriptor();
 }
 
-void MTLEngine::run(Camera* camera) {
+void MTLEngine::run(Camera* camera, RenderMode renderMode) {
     pPool = NS::AutoreleasePool::alloc()->init();
     MTL::Buffer* geometryData = componentManager->get_geometry(0);
     Texture* textureData = componentManager->get_texture(0);
@@ -47,9 +47,22 @@ void MTLEngine::run(Camera* camera) {
     renderCommandEncoder->setDepthStencilState(depthStencilState);
     renderCommandEncoder->setVertexBuffer(geometryData, 0, 0);
     renderCommandEncoder->setVertexBuffer(transformationBuffer, 0, 1);
-    MTL::PrimitiveType typeTriangle = MTL::PrimitiveTypeTriangle;
+    // Translate from engine specific to API specific modes
+    MTL::PrimitiveType typeTriangle;
+    switch (renderMode)
+    {
+        case full:      
+            typeTriangle = MTL::PrimitiveTypeTriangle;
+            break;
+        case wireframe:
+            typeTriangle = MTL::PrimitiveTypeLine;
+            break;
+        default:
+            typeTriangle = MTL::PrimitiveTypeTriangle;
+    }
     NS::UInteger vertexStart = 0;
     
+    // TODO: This should come from the model's spec.. maybe this should be encapsulated in a Mesh class
     NS::UInteger vertexCount = 84816;
     renderCommandEncoder->setFragmentTexture(textureData->texture, 0);
     renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, vertexCount, componentManager->getNumEntities());

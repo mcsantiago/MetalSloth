@@ -28,6 +28,7 @@ private:
     PhysicsSystem* physicsSystem;
     ComponentManager* componentManager;
     
+    RenderMode renderMode = full;
     GLFWwindow* glfwWindow;
     MTL::Device* metalDevice;
     
@@ -99,7 +100,7 @@ private:
     void initGlfwCallbacks();
     
     // Model loading
-    void loadFbxFile();
+    void loadFbxFile(const char *filename);
     void loadPolygons(int entityId, ufbx_mesh *mesh);
     void loadObject(int entityId,
                     simd::float3 position,
