@@ -1,0 +1,22 @@
+# Blender 4.0.2 MTL File: 'donut.blend'
+# www.blender.org
+
+newmtl Material.002
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd /Users/mac/VideoGameAssets/Blender Donut/donut base.png
+
+newmtl Material.004
+Ns 485.600494
+Ka 0.511811 0.511811 0.511811
+Kd 1.000000 0.849903 0.872630
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3

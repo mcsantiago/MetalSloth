@@ -7,11 +7,11 @@
 
 #include "sloth_engine.hpp"
 #include <cmath>
-#include <iostream>
 
 void SlothEngine::init() {
     initDevice();
     initWindow();
+    initImGui();
     initSystems();
     loadScene();
     initGlfwCallbacks();
@@ -36,6 +36,20 @@ void SlothEngine::initWindow() {
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
+}
+
+void SlothEngine::initImGui() {
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+//    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+//    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+//    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(glfwWindow, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+    ImGui_ImplMetal_Init(metalDevice);
 }
 
 void SlothEngine::initGlfwCallbacks() {
@@ -207,6 +221,7 @@ void SlothEngine::run() {
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameTime);
         float deltaTime = duration.count() / 1000.0;
         // TODO: encapsulate this in to an event queue?
+        glfwPollEvents();
         camera->update();
         if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS) {
             camera->position += camera->front * camera->cameraSpeed * deltaTime;
@@ -231,7 +246,6 @@ void SlothEngine::run() {
         }
 //        physicsSystem->update_loaded_entities(deltaTime);
         renderingSystem->run(camera, renderMode);
-        glfwPollEvents();
         lastFrameTime = now;
     }
 }
@@ -241,6 +255,13 @@ void SlothEngine::cleanup() {
     physicsSystem->cleanup();
     metalDevice->release();
     
+    ImGui_ImplMetal_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    
+    glfwDestroyWindow(glfwWindow);
+    glfwTerminate();
+
     delete camera;
     delete componentManager;
     delete renderingSystem;

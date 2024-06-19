@@ -8,14 +8,17 @@
 #ifndef sloth_engine_hpp
 #define sloth_engine_hpp
 
+#include "glfw_bridge.hpp"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_metal.h"
+
 #define GLFW_INCLUDE_NONE
 #import <GLFW/glfw3.h>
 
-#include <Metal/Metal.hpp>
 #include <chrono>
 #include <unordered_map>
 #include <iostream>
-#include "glfw_bridge.hpp"
 #include "mtl_rendering_system.hpp"
 #include "physics_engine.hpp"
 #include "vertex_data.h"
@@ -96,6 +99,7 @@ private:
 
     void initWindow();
     void initDevice();
+    void initImGui();
     void initSystems();
     void initGlfwCallbacks();
     

@@ -8,6 +8,10 @@
 #ifndef mtl_engine_h
 #define mtl_engine_h
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_metal.h"
+
 #define GLFW_INCLUDE_NONE
 #import <GLFW/glfw3.h>
 
@@ -70,6 +74,7 @@ private:
     
     MTL::Buffer* vertexBuffer;
     MTL::Buffer* transformationBuffer;
+    bool showWindow = true;
     int sampleCount = 4; // MSAA Sample count
     
     NS::AutoreleasePool* pPool;

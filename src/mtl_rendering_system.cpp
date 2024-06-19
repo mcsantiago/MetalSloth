@@ -29,6 +29,7 @@ void MTLRenderingSystem::init() {
 
 void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     pPool = NS::AutoreleasePool::alloc()->init();
+    
     MTL::Buffer* geometryData = componentManager->get_geometry(0);
     Texture* textureData = componentManager->get_texture(0);
     metalDrawable = layer->nextDrawable();
@@ -38,11 +39,10 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     for (int i = 0; i < componentManager->getNumEntities(); i++) {
         encodeRenderCommand(renderCommandEncoder, i, camera);
     }
-    
+
     memcpy(transformationBuffer->contents(), &transformationData, sizeof(transformationData));
     renderCommandEncoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
     renderCommandEncoder->setCullMode(MTL::CullModeBack);
-//    renderCommandEncoder->setTriangleFillMode(MTL::TriangleFillModeLines);
     renderCommandEncoder->setRenderPipelineState(metalRenderPSO);
     renderCommandEncoder->setDepthStencilState(depthStencilState);
     renderCommandEncoder->setVertexBuffer(geometryData, 0, 0);
@@ -66,6 +66,18 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     NS::UInteger vertexCount = 84816;
     renderCommandEncoder->setFragmentTexture(textureData->texture, 0);
     renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, vertexCount, componentManager->getNumEntities());
+    
+    renderCommandEncoder->pushDebugGroup(NS::String::string("ImGui demo", NS::ASCIIStringEncoding));
+    ImGui_ImplMetal_NewFrame(renderPassDescriptor);
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+    ImGui::End();
+    ImGui::Render();
+    ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), metalCommandBuffer, renderCommandEncoder);
+    renderCommandEncoder->popDebugGroup();
+    
     renderCommandEncoder->endEncoding();
     swapBuffers();
     pPool->release();
@@ -88,7 +100,7 @@ void MTLRenderingSystem::initWindow() {
     layer = CA::MetalLayer::layer();
     layer->setDevice(metalDevice);
     layer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
-    layer->setDrawableSize(CGSizeMake(800, 600));
+    layer->setDrawableSize(CGSizeMake(1600, 1200));
     GLFWBridge::AddLayerToWindow(glfwWindow, layer);
     metalDrawable = layer->nextDrawable();
 }
