@@ -23,7 +23,7 @@ void SlothEngine::initDevice() {
 
 void SlothEngine::initSystems() {
     componentManager = new ComponentManager();
-    renderingSystem = new MTLRenderingSystem(componentManager, metalDevice, glfwWindow);
+    renderingSystem = new MTLRenderingSystem(componentManager, metalDevice, glfwWindow, 1920, 1080);
     physicsSystem = new PhysicsSystem(componentManager, metalDevice);
     renderingSystem->init();
 }
@@ -31,7 +31,7 @@ void SlothEngine::initSystems() {
 void SlothEngine::initWindow() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindow = glfwCreateWindow(800, 600, "Metal Engine", nullptr, nullptr);
+    glfwWindow = glfwCreateWindow(1920, 1080, "Metal Engine", nullptr, nullptr);
     if (glfwWindow == nullptr) {
         glfwTerminate();
         exit(EXIT_FAILURE);
@@ -114,7 +114,11 @@ void SlothEngine::loadPolygons(int entityId, ufbx_mesh *mesh) {
     // Maybe an atomic reference counter would be necessary, but for now I will only free memory
     // once the component_manager is freed.
     
+    MeshInfo meshInfo;
+    
     size_t n = mesh->faces.count;
+    unsigned long numTriangles = 0;
+    unsigned long numVerteces = 0;
     std::vector<VertexData> triangles;
     for (size_t i = 0; i < n; i++) {
         ufbx_face face = mesh->faces.data[i];
@@ -132,6 +136,7 @@ void SlothEngine::loadPolygons(int entityId, ufbx_mesh *mesh) {
                     {(float)uv.x, (float)uv.y}
                 };
                 triangles.push_back(point);
+                numTriangles += 1;
             }
         } else if (face.num_indices == 4) {
             // TODO: I'm sure there's a nice way to write this function.
@@ -183,13 +188,19 @@ void SlothEngine::loadPolygons(int entityId, ufbx_mesh *mesh) {
                 {(float)normal3.x, (float)normal3.y, (float)normal3.z},
                 {(float)uv3.x, (float)uv3.y}
             });
+            
+            numTriangles += 2;
         }
     }
-    vertexBuffer = metalDevice->newBuffer(triangles.data(),
+    
+    
+    meshInfo.numTriangles = numTriangles;
+    meshInfo.numVerteces = triangles.size();
+    meshInfo.vertexBuffer = metalDevice->newBuffer(triangles.data(),
                                           sizeof(VertexData) * triangles.size(),
                                           MTL::ResourceStorageModeShared);
-
-    componentManager->register_geometry(entityId, vertexBuffer);
+    
+    componentManager->register_geometry(entityId, meshInfo);
 }
 
 void SlothEngine::loadObject(int entityId, 

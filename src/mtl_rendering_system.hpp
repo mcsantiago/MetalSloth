@@ -19,6 +19,7 @@
 #include "vertex_data.h"
 #include "texture.hpp"
 #include "camera.hpp"
+#include "component_types/mesh_component.hpp"
 #include "component_manager.hpp"
 #include <stb/stb_image.h>
 #include <Metal/Metal.hpp>
@@ -30,7 +31,7 @@ enum RenderMode { full, wireframe };
 
 class MTLRenderingSystem {
 public:
-    MTLRenderingSystem(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow);
+    MTLRenderingSystem(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow, int width, int height);
     void init();
     void run(Camera* camera, RenderMode renderMode);
     void swapBuffers();
@@ -54,9 +55,14 @@ private:
     void draw(int entityId, Camera* camera, MTL::RenderCommandEncoder* renderEncoder);
     void updateRenderPassDescriptor();
     
+    // ImGui Widgets
+    void drawMeshInfoWidget(MeshInfo meshInfo, MTL::RenderCommandEncoder* renderCommandEncoder);
+    
+    
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
     void resizeFrameBuffer(int width, int height);
     
+    int displayWidth, displayHeight;
     TransformationData transformationData[1];
     MTL::Device* metalDevice;
     GLFWwindow* glfwWindow;
@@ -72,9 +78,7 @@ private:
     MTL::Texture* msaaRenderTargetTexture = nullptr;
     MTL::Texture* depthTexture;
     
-    MTL::Buffer* vertexBuffer;
     MTL::Buffer* transformationBuffer;
-    bool showWindow = true;
     int sampleCount = 4; // MSAA Sample count
     
     NS::AutoreleasePool* pPool;

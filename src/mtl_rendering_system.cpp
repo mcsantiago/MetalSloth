@@ -9,11 +9,14 @@
 #include "camera.hpp"
 #include <simd/simd.h>
 #include <iostream>
+#include <string>
 
-MTLRenderingSystem::MTLRenderingSystem(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow) {
+MTLRenderingSystem::MTLRenderingSystem(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow, int width, int height) {
     this->componentManager = manager;
     this->metalDevice = metalDevice;
     this->glfwWindow = glfwWindow;
+    this->displayWidth = width;
+    this->displayHeight = height;
 }
 
 void MTLRenderingSystem::init() {
@@ -30,7 +33,8 @@ void MTLRenderingSystem::init() {
 void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     pPool = NS::AutoreleasePool::alloc()->init();
     
-    MTL::Buffer* geometryData = componentManager->get_geometry(0);
+    MeshInfo meshInfo = componentManager->get_geometry(0);
+    MTL::Buffer* geometryData = meshInfo.vertexBuffer;
     Texture* textureData = componentManager->get_texture(0);
     metalDrawable = layer->nextDrawable();
     metalCommandBuffer = metalCommandQueue->commandBuffer();
@@ -62,20 +66,13 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     }
     NS::UInteger vertexStart = 0;
     
-    // TODO: This should come from the model's spec.. maybe this should be encapsulated in a Mesh class
-    NS::UInteger vertexCount = 84816;
     renderCommandEncoder->setFragmentTexture(textureData->texture, 0);
-    renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, vertexCount, componentManager->getNumEntities());
+    renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, meshInfo.numVerteces, componentManager->getNumEntities());
     
-    renderCommandEncoder->pushDebugGroup(NS::String::string("ImGui demo", NS::ASCIIStringEncoding));
+    renderCommandEncoder->pushDebugGroup(NS::String::string("ImGui", NS::ASCIIStringEncoding));
     ImGui_ImplMetal_NewFrame(renderPassDescriptor);
     ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-    ImGui::End();
-    ImGui::Render();
-    ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), metalCommandBuffer, renderCommandEncoder);
+    drawMeshInfoWidget(meshInfo, renderCommandEncoder);
     renderCommandEncoder->popDebugGroup();
     
     renderCommandEncoder->endEncoding();
@@ -100,24 +97,26 @@ void MTLRenderingSystem::initWindow() {
     layer = CA::MetalLayer::layer();
     layer->setDevice(metalDevice);
     layer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
-    layer->setDrawableSize(CGSizeMake(1600, 1200));
+    layer->setDrawableSize(CGSizeMake(displayWidth*2, displayHeight*2));
     GLFWBridge::AddLayerToWindow(glfwWindow, layer);
     metalDrawable = layer->nextDrawable();
 }
 
+// TODO: This should be refactored by registering a MeshInfo in componentManager
 void MTLRenderingSystem::createTriangle() {
-    simd::float3 triangleVertices[] = {
-        {-0.5f, -0.5f, 0.0f},
-        { 0.5f, -0.5f, 0.0f},
-        { 0.0f,  0.5f, 0.0f}
-    };
-    
-    vertexBuffer = metalDevice->newBuffer(&triangleVertices,
-                                          sizeof(triangleVertices),
-                                          MTL::ResourceStorageModeShared);
-    
+//    simd::float3 triangleVertices[] = {
+//        {-0.5f, -0.5f, 0.0f},
+//        { 0.5f, -0.5f, 0.0f},
+//        { 0.0f,  0.5f, 0.0f}
+//    };
+//    
+//    vertexBuffer = metalDevice->newBuffer(&triangleVertices,
+//                                          sizeof(triangleVertices),
+//                                          MTL::ResourceStorageModeShared);
+//    
 }
 
+// TODO: This should be refactored by registering a MeshInfo in componentManager
 void MTLRenderingSystem::createSquare() {
 //    VertexData squareVertices[] {
 //        {{-0.5, -0.5,  0.5, 1.0f}, {0.0f, 0.0f}},
@@ -292,4 +291,16 @@ void MTLRenderingSystem::updateRenderPassDescriptor() {
     colorAttachment->setResolveTexture(metalDrawable->texture());
     
     depthAttachment->setTexture(depthTexture);
+}
+
+void MTLRenderingSystem::drawMeshInfoWidget(MeshInfo meshInfo, MTL::RenderCommandEncoder* renderCommandEncoder) {
+    ImGui::NewFrame();
+    ImGui::Begin("MeshInfo Widget");                          // Create a window called "Hello, world!" and append into it.
+    ImGui::SetWindowSize({400, 300});
+    ImGui::SetWindowFontScale(2);
+    ImGui::Text("numTriangles: %d", meshInfo.numTriangles);               // Display some text (you can use a format strings too)
+    ImGui::Text("numVerteces: %d", meshInfo.numVerteces);
+    ImGui::End();
+    ImGui::Render();
+    ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), metalCommandBuffer, renderCommandEncoder);
 }
