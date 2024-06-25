@@ -56,7 +56,7 @@ private:
     void updateRenderPassDescriptor();
     
     // ImGui Widgets
-    void drawMeshInfoWidget(MeshInfo meshInfo, MTL::RenderCommandEncoder* renderCommandEncoder);
+    void drawMeshInfoWidget(std::optional<MeshInfo> meshInfo, MTL::RenderCommandEncoder* renderCommandEncoder);
     
     
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);

@@ -66,7 +66,6 @@ void SlothEngine::createCamera() {
 
 void SlothEngine::loadScene() {
     createCamera();
-//    texture = new Texture("assets/anya.jpg", metalDevice);
     loadFbxFile("assets/X Bot.fbx");
     loadObject(0,
                {0.0f, 0.0f, 0.0f},
@@ -118,7 +117,6 @@ void SlothEngine::loadPolygons(int entityId, ufbx_mesh *mesh) {
     
     size_t n = mesh->faces.count;
     unsigned long numTriangles = 0;
-    unsigned long numVerteces = 0;
     std::vector<VertexData> triangles;
     for (size_t i = 0; i < n; i++) {
         ufbx_face face = mesh->faces.data[i];
@@ -221,8 +219,6 @@ void SlothEngine::loadObject(int entityId,
     
     componentManager->register_transform(entityId, transform);
     componentManager->register_kinetic_physical_properties(entityId, kinetics);
-    componentManager->register_texture(entityId, texture);
-    
 //    transformationBuffers.insert({entityId, metalDevice->newBuffer(sizeof(TransformationData), MTL::ResourceStorageModeShared)});
 }
 
@@ -277,5 +273,4 @@ void SlothEngine::cleanup() {
     delete componentManager;
     delete renderingSystem;
     delete physicsSystem;
-//    delete texture;
 }

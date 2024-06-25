@@ -32,12 +32,16 @@ public:
     }
     
     void update_entity(int entityId, float deltaTime) {
-        Transform* transform = manager->get_transform(entityId);
-        KineticPhysicalProperties* kinetics = manager->get_kinetics(entityId);
+        std::optional<Transform> transform = manager->get_transform(entityId);
+        std::optional<KineticPhysicalProperties> kinetics = manager->get_kinetics(entityId);
         
-        simd::float3& position = transform->position;
-        simd::float3& velocity = kinetics->velocity;
-        simd::float3& acceleration = kinetics->acceleration;
+        if (!transform || !kinetics) {
+            return;
+        }
+        
+        simd::float3 position = transform->position;
+        simd::float3 velocity = kinetics->velocity;
+        simd::float3 acceleration = kinetics->acceleration;
         
         float g_y = -1 * g * physical_scale;
         acceleration = simd::float3{0, g_y, 0};

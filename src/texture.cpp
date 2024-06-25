@@ -7,6 +7,8 @@
 
 #include "texture.hpp"
 
+Texture::Texture() {}
+
 Texture::Texture(const char* filepath, MTL::Device* metalDevice) {
     stbi_set_flip_vertically_on_load(true);
     unsigned char* image = stbi_load(filepath, &width, &height, &channels, STBI_rgb_alpha);

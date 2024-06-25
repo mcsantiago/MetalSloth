@@ -33,9 +33,10 @@ void MTLRenderingSystem::init() {
 void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     pPool = NS::AutoreleasePool::alloc()->init();
     
-    MeshInfo meshInfo = componentManager->get_geometry(0);
-    MTL::Buffer* geometryData = meshInfo.vertexBuffer;
-    Texture* textureData = componentManager->get_texture(0);
+    std::optional<MeshInfo> meshInfo = componentManager->get_geometry(0);
+    std::optional<Texture> textureData = componentManager->get_texture(0);
+    
+    MTL::Buffer* geometryData = meshInfo->vertexBuffer;
     metalDrawable = layer->nextDrawable();
     metalCommandBuffer = metalCommandQueue->commandBuffer();
     MTL::RenderCommandEncoder* renderCommandEncoder = metalCommandBuffer->renderCommandEncoder(renderPassDescriptor);
@@ -66,8 +67,8 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     }
     NS::UInteger vertexStart = 0;
     
-    renderCommandEncoder->setFragmentTexture(textureData->texture, 0);
-    renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, meshInfo.numVerteces, componentManager->getNumEntities());
+    if (textureData) renderCommandEncoder->setFragmentTexture(textureData->texture, 0);
+    renderCommandEncoder->drawPrimitives(typeTriangle, vertexStart, meshInfo->numVerteces, componentManager->getNumEntities());
     
     renderCommandEncoder->pushDebugGroup(NS::String::string("ImGui", NS::ASCIIStringEncoding));
     ImGui_ImplMetal_NewFrame(renderPassDescriptor);
@@ -193,7 +194,7 @@ void MTLRenderingSystem::swapBuffers() {
 }
 
 void MTLRenderingSystem::encodeRenderCommand(MTL::RenderCommandEncoder* renderCommandEncoder, int entityId, Camera* camera) {
-    Transform* transform = componentManager->get_transform(entityId);
+    std::optional<Transform> transform = componentManager->get_transform(entityId);
     matrix_float4x4 translationMatrix = matrix4x4_translation(transform->position);
 
     // TODO: Introduce physics system
@@ -293,13 +294,13 @@ void MTLRenderingSystem::updateRenderPassDescriptor() {
     depthAttachment->setTexture(depthTexture);
 }
 
-void MTLRenderingSystem::drawMeshInfoWidget(MeshInfo meshInfo, MTL::RenderCommandEncoder* renderCommandEncoder) {
+void MTLRenderingSystem::drawMeshInfoWidget(std::optional<MeshInfo> meshInfo, MTL::RenderCommandEncoder* renderCommandEncoder) {
     ImGui::NewFrame();
     ImGui::Begin("MeshInfo Widget");                          // Create a window called "Hello, world!" and append into it.
     ImGui::SetWindowSize({400, 300});
     ImGui::SetWindowFontScale(2);
-    ImGui::Text("numTriangles: %d", meshInfo.numTriangles);               // Display some text (you can use a format strings too)
-    ImGui::Text("numVerteces: %d", meshInfo.numVerteces);
+    ImGui::Text("Num Triangles: %d", meshInfo->numTriangles);               // Display some text (you can use a format strings too)
+    ImGui::Text("Num Verteces: %d", meshInfo->numVerteces);
     ImGui::End();
     ImGui::Render();
     ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), metalCommandBuffer, renderCommandEncoder);

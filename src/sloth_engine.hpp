@@ -37,8 +37,6 @@ private:
     
     // TODO: Maybe a map of buffers?
     std::unordered_map<int, MTL::Buffer*> transformationBuffers;
-    Texture* texture;
-    MTL::Buffer* vertexBuffer;
     
     NS::AutoreleasePool* pPool;
     Camera* camera;

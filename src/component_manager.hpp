@@ -11,6 +11,7 @@
 #include <simd/simd.h>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 #include "vertex_data.h"
 #include "texture.hpp"
 #include "component_types/mesh_component.hpp"
@@ -32,22 +33,22 @@ private:
     std::unordered_map<int, Transform> transforms;
     std::unordered_map<int, KineticPhysicalProperties> kinetics;
     std::unordered_map<int, MeshInfo> geometryData;
-    std::unordered_map<int, Texture*> textureData;
+    std::unordered_map<int, Texture> textureData;
 public:
     int register_transform(int entityId, Transform);
     int register_kinetic_physical_properties(int entityId, KineticPhysicalProperties);
     int register_geometry(int entityId, MeshInfo mesh);
-    int register_texture(int entityId, Texture* texture);
+    int register_texture(int entityId, Texture texture);
     
     int getNumEntities() {
         return 1;
     }
     void cleanup();
 
-    Transform* get_transform(int entityId);
-    KineticPhysicalProperties* get_kinetics(int entityId);
-    MeshInfo get_geometry(int entityId);
-    Texture* get_texture(int entityId);
+    std::optional<Transform> get_transform(int entityId);
+    std::optional<KineticPhysicalProperties> get_kinetics(int entityId);
+    std::optional<MeshInfo> get_geometry(int entityId);
+    std::optional<Texture> get_texture(int entityId);
 };
 
 #endif /* component_manager_hpp */

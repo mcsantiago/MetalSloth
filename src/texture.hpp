@@ -13,6 +13,7 @@
 
 class Texture {
 public:
+    Texture();
     Texture(const char* filepath, MTL::Device* metalDevice);
     ~Texture();
     MTL::Texture* texture;

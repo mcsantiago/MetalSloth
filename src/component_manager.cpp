@@ -22,52 +22,51 @@ int ComponentManager::register_geometry(int entityId, MeshInfo data) {
     return entityId;
 }
 
-int ComponentManager::register_texture(int entityId, Texture* texture) {
+int ComponentManager::register_texture(int entityId, Texture texture) {
     textureData.insert({entityId, texture});
     return entityId;
 }
 
-Transform* ComponentManager::get_transform(int entityId) {
+std::optional<Transform> ComponentManager::get_transform(int entityId) {
     if (!transforms.contains(entityId)) {
-        return nullptr;
+        return std::nullopt;
     }
     
-    return &transforms[entityId];
+    return std::optional<Transform>{transforms[entityId]};
 }
 
-KineticPhysicalProperties* ComponentManager::get_kinetics(int entityId) {
+std::optional<KineticPhysicalProperties> ComponentManager::get_kinetics(int entityId) {
     if (!kinetics.contains(entityId)) {
-        return nullptr;
+        return std::nullopt;
     }
     
-    return &kinetics[entityId];
+    return std::optional<KineticPhysicalProperties>{kinetics[entityId]};
 }
 
-MeshInfo ComponentManager::get_geometry(int entityId) {
+std::optional<MeshInfo> ComponentManager::get_geometry(int entityId) {
     if (!geometryData.contains(entityId)) {
-        return MeshInfo(); // TODO: Hmm, maybe options would be good here
-    }
-    // TODO: consider entities with multiple meshes
-    return geometryData[entityId];
-}
-
-Texture* ComponentManager::get_texture(int entityId) {
-    if (!textureData.contains(entityId)) {
-        return nullptr;
+        return std::nullopt;
     }
     
-    return textureData[entityId];
+    return std::optional<MeshInfo>{geometryData[entityId]};
+}
+
+std::optional<Texture> ComponentManager::get_texture(int entityId) {
+    if (!textureData.contains(entityId)) {
+        return std::nullopt;
+    }
+    
+    return std::optional<Texture>{textureData[entityId]};
 }
 
 void ComponentManager::cleanup() {
     // Should component manager be responsible for cleaning up the textures? Hmm..
     for (auto it = textureData.begin(); it != textureData.end(); ++it) {
-        delete it->second;
+        free(it->second.texture);
     }
     textureData.clear();
     for (auto it = geometryData.begin(); it != geometryData.end(); ++it) {
-        // TODO:
-//        delete it->second;
+        free(it->second.vertexBuffer);
     }
     geometryData.clear();
 }
