@@ -24,4 +24,10 @@ struct TransformationData {
     float4x4 perspectiveMatrix;
 };
 
+struct Transform {
+    simd::float3 position;
+    simd::float3 rotation;
+    simd::float3 scale;
+};
+
 #endif /* vertex_data_h */

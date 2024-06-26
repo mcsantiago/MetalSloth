@@ -36,7 +36,7 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     std::optional<MeshInfo> meshInfo = componentManager->get_geometry(0);
     std::optional<Texture> textureData = componentManager->get_texture(0);
     
-    MTL::Buffer* geometryData = meshInfo->vertexBuffer;
+    
     metalDrawable = layer->nextDrawable();
     metalCommandBuffer = metalCommandQueue->commandBuffer();
     MTL::RenderCommandEncoder* renderCommandEncoder = metalCommandBuffer->renderCommandEncoder(renderPassDescriptor);
@@ -46,12 +46,14 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     }
 
     memcpy(transformationBuffer->contents(), &transformationData, sizeof(transformationData));
+    memcpy(cameraTransformBuffer->contents(), &camera->position, sizeof(simd::float3));
     renderCommandEncoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
     renderCommandEncoder->setCullMode(MTL::CullModeBack);
     renderCommandEncoder->setRenderPipelineState(metalRenderPSO);
     renderCommandEncoder->setDepthStencilState(depthStencilState);
-    renderCommandEncoder->setVertexBuffer(geometryData, 0, 0);
+    renderCommandEncoder->setVertexBuffer(meshInfo->vertexBuffer, 0, 0);
     renderCommandEncoder->setVertexBuffer(transformationBuffer, 0, 1);
+    renderCommandEncoder->setVertexBuffer(cameraTransformBuffer, 0, 2);
     // Translate from engine specific to API specific modes
     MTL::PrimitiveType typeTriangle;
     switch (renderMode)
@@ -74,6 +76,7 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     ImGui_ImplMetal_NewFrame(renderPassDescriptor);
     ImGui_ImplGlfw_NewFrame();
     drawMeshInfoWidget(meshInfo, renderCommandEncoder);
+    drawCameraInfoWidget(camera, renderCommandEncoder);
     renderCommandEncoder->popDebugGroup();
     
     renderCommandEncoder->endEncoding();
@@ -84,7 +87,9 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
 void MTLRenderingSystem::cleanup() {
     // componentManager will be cleaned up by SlothEngine
     glfwTerminate();
+    // TODO: Should the MTL::Buffers* even be managed by the rendering system?
     transformationBuffer->release();
+    cameraTransformBuffer->release();
     msaaRenderTargetTexture->release();
     depthTexture->release();
     renderPassDescriptor->release();
@@ -239,6 +244,7 @@ void MTLRenderingSystem::resizeFrameBuffer(int width, int height) {
 
 void MTLRenderingSystem::createBuffers() {
     transformationBuffer = metalDevice->newBuffer(sizeof(transformationData), MTL::ResourceStorageModeShared);
+    cameraTransformBuffer = metalDevice->newBuffer(sizeof(simd::float3), MTL::ResourceStorageModeShared);
 }
 
 void MTLRenderingSystem::createDepthAndMSAATextures() {
@@ -301,6 +307,18 @@ void MTLRenderingSystem::drawMeshInfoWidget(std::optional<MeshInfo> meshInfo, MT
     ImGui::SetWindowFontScale(2);
     ImGui::Text("Num Triangles: %d", meshInfo->numTriangles);               // Display some text (you can use a format strings too)
     ImGui::Text("Num Verteces: %d", meshInfo->numVerteces);
+    ImGui::End();
+    ImGui::Render();
+    ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), metalCommandBuffer, renderCommandEncoder);
+}
+
+void MTLRenderingSystem::drawCameraInfoWidget(Camera *camera, MTL::RenderCommandEncoder *renderCommandEncoder) {
+    ImGui::NewFrame();
+    ImGui::Begin("Camera Widget");
+    ImGui::SetWindowSize({600, 300});
+    ImGui::SetWindowPos({100, 200});
+    ImGui::SetWindowFontScale(2);
+    ImGui::Text("Camera Position: \n\t%.2f, %.2f, %.2f", camera->position.x, camera->position.y, camera->position.z);
     ImGui::End();
     ImGui::Render();
     ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), metalCommandBuffer, renderCommandEncoder);

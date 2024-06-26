@@ -8,21 +8,25 @@
 #include "component_manager.hpp"
 
 int ComponentManager::register_transform(int entityId, Transform transformComponent) {
+    entities.insert(entityId);
     transforms.insert({entityId, transformComponent});
     return entityId;
 }
 
 int ComponentManager::register_kinetic_physical_properties(int entityId, KineticPhysicalProperties component) {
+    entities.insert(entityId);
     kinetics.insert({entityId, component});
     return entityId;
 }
 
 int ComponentManager::register_geometry(int entityId, MeshInfo data) {
+    entities.insert(entityId);
     geometryData.insert({entityId, data});
     return entityId;
 }
 
 int ComponentManager::register_texture(int entityId, Texture texture) {
+    entities.insert(entityId);
     textureData.insert({entityId, texture});
     return entityId;
 }

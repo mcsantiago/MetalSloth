@@ -10,17 +10,13 @@
 
 #include <simd/simd.h>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <optional>
 #include "vertex_data.h"
 #include "texture.hpp"
 #include "component_types/mesh_component.hpp"
 
-struct Transform {
-    simd::float3 position;
-    simd::float3 rotation;
-    simd::float3 scale;
-};
 
 struct KineticPhysicalProperties {
     float mass;
@@ -30,6 +26,7 @@ struct KineticPhysicalProperties {
 
 class ComponentManager {
 private:
+    std::unordered_set<int> entities;
     std::unordered_map<int, Transform> transforms;
     std::unordered_map<int, KineticPhysicalProperties> kinetics;
     std::unordered_map<int, MeshInfo> geometryData;
@@ -40,8 +37,8 @@ public:
     int register_geometry(int entityId, MeshInfo mesh);
     int register_texture(int entityId, Texture texture);
     
-    int getNumEntities() {
-        return 1;
+    size_t getNumEntities() {
+        return entities.size();
     }
     void cleanup();
 

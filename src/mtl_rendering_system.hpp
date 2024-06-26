@@ -57,13 +57,15 @@ private:
     
     // ImGui Widgets
     void drawMeshInfoWidget(std::optional<MeshInfo> meshInfo, MTL::RenderCommandEncoder* renderCommandEncoder);
-    
+    void drawCameraInfoWidget(Camera* camera, MTL::RenderCommandEncoder* renderCommandEncoder);
+
     
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
     void resizeFrameBuffer(int width, int height);
     
     int displayWidth, displayHeight;
     TransformationData transformationData[1];
+    Transform cameraTransform;
     MTL::Device* metalDevice;
     GLFWwindow* glfwWindow;
     CA::MetalDrawable* metalDrawable;
@@ -79,6 +81,7 @@ private:
     MTL::Texture* depthTexture;
     
     MTL::Buffer* transformationBuffer;
+    MTL::Buffer* cameraTransformBuffer;
     int sampleCount = 4; // MSAA Sample count
     
     NS::AutoreleasePool* pPool;
