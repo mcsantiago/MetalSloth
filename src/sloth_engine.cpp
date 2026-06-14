@@ -43,6 +43,7 @@ void SlothEngine::initImGui() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
+    io.FontGlobalScale = 2.0f; // uniform 2x font across all widgets and the menu bar
 //    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 //    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 //    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch

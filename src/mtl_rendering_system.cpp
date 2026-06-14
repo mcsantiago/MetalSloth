@@ -305,7 +305,6 @@ void MTLRenderingSystem::drawMeshInfoWidget(std::optional<MeshInfo> meshInfo, MT
     ImGui::NewFrame();
     ImGui::Begin("MeshInfo Widget");                          // Create a window called "Hello, world!" and append into it.
     ImGui::SetWindowSize({400, 300});
-    ImGui::SetWindowFontScale(2);
     ImGui::Text("Num Triangles: %d", meshInfo->numTriangles);               // Display some text (you can use a format strings too)
     ImGui::Text("Num Verteces: %d", meshInfo->numVerteces);
     ImGui::End();
@@ -318,7 +317,6 @@ void MTLRenderingSystem::drawCameraInfoWidget(Camera *camera, MTL::RenderCommand
     ImGui::Begin("Camera Widget");
     ImGui::SetWindowSize({600, 300});
     ImGui::SetWindowPos({100, 200});
-    ImGui::SetWindowFontScale(2);
     ImGui::Text("Camera Position: \n\t%.2f, %.2f, %.2f", camera->position.x, camera->position.y, camera->position.z);
     ImGui::End();
     ImGui::Render();
