@@ -59,8 +59,7 @@ void SlothEngine::initGlfwCallbacks() {
 }
 
 void SlothEngine::createCamera() {
-    int c = cbrt(static_cast<double>(componentManager->getNumEntities()));
-    simd::float3 position   = simd::float3{c * 1.0f, c * 1.0f,  c * 3.0f};
+    simd::float3 position   = simd::float3{-0.86f, 120.35f, 125.36f};
     camera = new Camera(position);
 }
 
