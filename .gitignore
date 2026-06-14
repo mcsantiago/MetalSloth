@@ -1,1 +1,7 @@
 MetalTest.xcodeproj/
+
+# CMake / terminal build output
+build/
+build-*/
+cmake-build-*/
+.idea/
