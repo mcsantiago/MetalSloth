@@ -33,7 +33,7 @@ class MTLRenderingSystem {
 public:
     MTLRenderingSystem(ComponentManager* manager, MTL::Device* metalDevice, GLFWwindow* glfwWindow, int width, int height);
     void init();
-    void run(Camera* camera, RenderMode renderMode);
+    void run(Camera* camera, RenderMode& renderMode);
     void swapBuffers();
     void cleanup();
     
@@ -58,6 +58,7 @@ private:
     // ImGui Widgets
     void drawMeshInfoWidget(std::optional<MeshInfo> meshInfo, MTL::RenderCommandEncoder* renderCommandEncoder);
     void drawCameraInfoWidget(Camera* camera, MTL::RenderCommandEncoder* renderCommandEncoder);
+    void drawViewMenu(RenderMode& renderMode, MTL::RenderCommandEncoder* renderCommandEncoder);
 
     
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);

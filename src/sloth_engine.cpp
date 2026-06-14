@@ -243,13 +243,14 @@ void SlothEngine::run() {
             simd::float3 right = simd::normalize(simd::cross(simd::float3{0,1,0}, camera->front));
             camera->position += right * camera->cameraSpeed * deltaTime;
         }
-        else if(glfwGetKey(glfwWindow, GLFW_KEY_Q) == GLFW_PRESS) {
-            if (renderMode == full) {
-                renderMode = wireframe;
-            } else {
-                renderMode = full;
-            }
+
+        // Toggle the triangle-mesh (wireframe) view with "T". Edge-detected so
+        // a single press flips it once instead of every frame it's held.
+        bool meshViewKeyPressed = glfwGetKey(glfwWindow, GLFW_KEY_T) == GLFW_PRESS;
+        if (meshViewKeyPressed && !meshViewKeyWasPressed) {
+            renderMode = (renderMode == full) ? wireframe : full;
         }
+        meshViewKeyWasPressed = meshViewKeyPressed;
 //        physicsSystem->update_loaded_entities(deltaTime);
         renderingSystem->run(camera, renderMode);
         lastFrameTime = now;

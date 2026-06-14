@@ -32,6 +32,7 @@ private:
     ComponentManager* componentManager;
     
     RenderMode renderMode = full;
+    bool meshViewKeyWasPressed = false; // edge-detect the "T" mesh-view toggle
     GLFWwindow* glfwWindow;
     MTL::Device* metalDevice;
     

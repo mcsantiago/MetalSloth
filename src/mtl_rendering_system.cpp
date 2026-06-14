@@ -30,7 +30,7 @@ void MTLRenderingSystem::init() {
     createRenderPassDescriptor();
 }
 
-void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
+void MTLRenderingSystem::run(Camera* camera, RenderMode& renderMode) {
     pPool = NS::AutoreleasePool::alloc()->init();
     
     std::optional<MeshInfo> meshInfo = componentManager->get_geometry(0);
@@ -77,6 +77,7 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode renderMode) {
     ImGui_ImplGlfw_NewFrame();
     drawMeshInfoWidget(meshInfo, renderCommandEncoder);
     drawCameraInfoWidget(camera, renderCommandEncoder);
+    drawViewMenu(renderMode, renderCommandEncoder);
     renderCommandEncoder->popDebugGroup();
     
     renderCommandEncoder->endEncoding();
@@ -320,6 +321,24 @@ void MTLRenderingSystem::drawCameraInfoWidget(Camera *camera, MTL::RenderCommand
     ImGui::SetWindowFontScale(2);
     ImGui::Text("Camera Position: \n\t%.2f, %.2f, %.2f", camera->position.x, camera->position.y, camera->position.z);
     ImGui::End();
+    ImGui::Render();
+    ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), metalCommandBuffer, renderCommandEncoder);
+}
+
+void MTLRenderingSystem::drawViewMenu(RenderMode& renderMode, MTL::RenderCommandEncoder* renderCommandEncoder) {
+    ImGui::NewFrame();
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("View")) {
+            bool meshView = (renderMode == wireframe);
+            // Toggle between the current shaded view and the triangle mesh
+            // (wireframe). Mirrors the "T" hotkey in SlothEngine::run().
+            if (ImGui::MenuItem("Mesh View", "T", meshView)) {
+                renderMode = meshView ? full : wireframe;
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
     ImGui::Render();
     ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), metalCommandBuffer, renderCommandEncoder);
 }
