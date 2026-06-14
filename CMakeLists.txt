@@ -7,6 +7,9 @@ project(MetalSlothEngine VERSION 1.0 LANGUAGES C CXX OBJC OBJCXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Emit compile_commands.json so clangd (nvim LSP) resolves metal-cpp headers etc.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Find Homebrew-installed GLFW (ships glfw3Config.cmake). Covers both the
 # Apple-silicon (/opt/homebrew) and Intel (/usr/local) Homebrew prefixes.
 list(APPEND CMAKE_PREFIX_PATH /opt/homebrew /usr/local)
