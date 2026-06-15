@@ -30,4 +30,10 @@ struct Transform {
     simd::float3 scale;
 };
 
+struct LightData {
+    simd::float3 position;
+    simd::float3 color;
+    float intensity;
+};
+
 #endif /* vertex_data_h */

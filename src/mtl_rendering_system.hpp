@@ -66,6 +66,7 @@ private:
     
     int displayWidth, displayHeight;
     TransformationData transformationData[1];
+    LightData lightData[1];
     Transform cameraTransform;
     MTL::Device* metalDevice;
     GLFWwindow* glfwWindow;
@@ -80,9 +81,11 @@ private:
     MTL::RenderPassDescriptor* renderPassDescriptor;
     MTL::Texture* msaaRenderTargetTexture = nullptr;
     MTL::Texture* depthTexture;
+
     
     MTL::Buffer* transformationBuffer;
     MTL::Buffer* cameraTransformBuffer;
+    MTL::Buffer* lightDataBuffer;
     int sampleCount = 4; // MSAA Sample count
     
     NS::AutoreleasePool* pPool;

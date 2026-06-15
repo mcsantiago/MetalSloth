@@ -35,6 +35,12 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode& renderMode) {
     
     std::optional<MeshInfo> meshInfo = componentManager->get_geometry(0);
     std::optional<Texture> textureData = componentManager->get_texture(0);
+    // TODO: Let this light be loaded from scene?
+    lightData[0] = { 
+        {10, 0, 0},     // position
+        {0.1, 0.9, 0},  // color
+        1.0             // intensity
+    };
     
     
     metalDrawable = layer->nextDrawable();
@@ -47,13 +53,20 @@ void MTLRenderingSystem::run(Camera* camera, RenderMode& renderMode) {
 
     memcpy(transformationBuffer->contents(), &transformationData, sizeof(transformationData));
     memcpy(cameraTransformBuffer->contents(), &camera->position, sizeof(simd::float3));
+    memcpy(lightDataBuffer->contents(), &lightData, sizeof(lightData));
     renderCommandEncoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
     renderCommandEncoder->setCullMode(MTL::CullModeBack);
     renderCommandEncoder->setRenderPipelineState(metalRenderPSO);
     renderCommandEncoder->setDepthStencilState(depthStencilState);
+
+    // VERTEX BUFFER
     renderCommandEncoder->setVertexBuffer(meshInfo->vertexBuffer, 0, 0);
     renderCommandEncoder->setVertexBuffer(transformationBuffer, 0, 1);
     renderCommandEncoder->setVertexBuffer(cameraTransformBuffer, 0, 2);
+
+    // FRAGMENT BUFFER
+    renderCommandEncoder->setFragmentBuffer(lightDataBuffer, 0, 0);
+
     // Translate from engine specific to API specific modes
     MTL::PrimitiveType typeTriangle;
     switch (renderMode)
@@ -246,6 +259,7 @@ void MTLRenderingSystem::resizeFrameBuffer(int width, int height) {
 void MTLRenderingSystem::createBuffers() {
     transformationBuffer = metalDevice->newBuffer(sizeof(transformationData), MTL::ResourceStorageModeShared);
     cameraTransformBuffer = metalDevice->newBuffer(sizeof(simd::float3), MTL::ResourceStorageModeShared);
+    lightDataBuffer = metalDevice->newBuffer(sizeof(lightData), MTL::ResourceStorageModeShared);
 }
 
 void MTLRenderingSystem::createDepthAndMSAATextures() {

@@ -44,10 +44,11 @@ vertex VertexOut vertexShader(uint vertexID [[vertex_id]],
 }
 
 fragment float4 fragmentShader(VertexOut in [[stage_in]],
-                               texture2d<float> colorTexture [[texture(0)]]) {
+                               texture2d<float> colorTexture [[texture(0)]],
+                               constant LightData& light [[buffer(0)]]) {
     // TODO: This should come from CPU process
-    float3 lightPos = {10, 0, 0};
-    float3 lightColor = {0.1, 0.9, 0};
+    float3 lightPos = light.position;
+    float3 lightColor = light.color;
     float3 objectColor = {1, 0, 0};
     float3 viewPos = in.cameraPos;
     float ambientStrength = 0.1;
